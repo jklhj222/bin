@@ -1,30 +1,37 @@
 #!/usr/bin/env python3
+# version 1.0.1 - make functions
 
 import os
-import sys
 from subprocess import call
 import glob
 import numpy as np
-import matplotlib.pyplot as plt
 import caffe
 
-# Assign the structure of network, differ with lenet_train_test.prototxt 
-#MODEL_FILE = '/home/s2c/pkg/local/caffe-master_cuDNN/examples/mnist/lenet.prototxt' 
+TEST = 'test hello world'
+
+SINGLE_PRED = False
+MULT_PRED = True
+
+KAGGLE_SUBMIT = True
+KAGGLE_HEADER = 'file,species'
+
+# Assign the structure of network
 MODEL_FILE = './deploy.prototxt' 
-#MODEL_FILE = 'lenet_train_test.prototxt' 
-#PRETRAINED = '/home/s2c/pkg/local/caffe-master_cuDNN/examples/mnist/lenet_iter_10000.caffemodel'
-PRETRAINED = './caffe_alexnet_train_iter_410000.caffemodel'
+PRETRAINED = './bvlc_googlenet_iter_300000.caffemodel'
 
 ## for single picture inference
 IMAGE_FILE = '/mnt/sdb1/work/kaggle/Plant_Seedlings_Classification/origin_data/divide_train_val_90.10/val_data/Fat_Hen/2719ff172.png'
+
 ## for multiple pictures inference
 IMAGES_DIR = '/mnt/sdb1/work/kaggle/Plant_Seedlings_Classification/origin_data/test/'
 
-mean_file = '/mnt/sdb1/work/kaggle/Plant_Seedlings_Classification/origin_data/divide_train_val_90.10/train_data/train_mean.npy'
+MEAN_FILE = '/mnt/sdb1/work/kaggle/Plant_Seedlings_Classification/origin_data/divide_train_val_90.10/train_data/train_mean.npy'
+
+NUM_CLASS = 12
 
 net = caffe.Classifier(MODEL_FILE, 
                        PRETRAINED, 
-                       mean=np.load(mean_file).mean(1).mean(1),
+                       mean=np.load(MEAN_FILE).mean(1).mean(1),
                        raw_scale=255, 
                        channel_swap=(2,1,0)
                       ) 
@@ -32,40 +39,67 @@ net = caffe.Classifier(MODEL_FILE,
 caffe.set_mode_gpu()
 
 ## for single picture inference
-#input_image = caffe.io.load_image(IMAGE_FILE, color=True)
-#print(input_image)
+def single_predict(img, num_class=NUM_CLASS):
+    input_image = caffe.io.load_image(img, color=True)
 
-#prediction = net.predict([input_image], oversample = True)
-
-#print(IMAGE_FILE)
-
-#for i in range(1,11):
-#    print( 'predicted class:', i, prediction[0].argsort()[-i] )
-
-#print( 'predicted class:', prediction[0].shape )
-#print( 'predicted class:', prediction[0].argmax() )
-#print( 'predicted class2:', prediction[0] )
-
+#    print(input_image)
+    print('prediction classes: ', num_class)
+    
+    prediction = net.predict([input_image], oversample = True)
+    
+    print('input image: ', img)
+    
+    for i in range(1, NUM_CLASS):
+        print( 'predicted top-' + str(i) + ':', prediction[0].argsort()[-i] )
+    
+    print( 'prediction shape:', prediction[0].shape )
+    print( 'predicted probs:', prediction[0] )
 
 ## for multiple pictures inference
-imgs = [img_path for img_path in glob.glob(IMAGES_DIR + "*.png")]
-
-preds = []
-for num, img in enumerate(imgs):
-    input_image = caffe.io.load_image(img, color=True)
-    prediction = net.predict([input_image], oversample = True)
-    print(num, os.path.basename(img))
-    for i in range(1,4):
-        print('predicted class', i, prediction[0].argsort()[-i])
-    preds.append( prediction[0].argmax() )
-
-print(preds)
-
+def mult_predict(imgs_dir):
+    imgs = [img_path for img_path in glob.glob(imgs_dir + "*")]
+    
+    preds = []
+    for num, img in enumerate(imgs):
+        input_image = caffe.io.load_image(img, color=True)
+        prediction = net.predict([input_image], oversample = True)
+        print(num, os.path.basename(img))
+        for i in range(1,6):
+            print('predicted top-' + str(i) + ':', prediction[0].argsort()[-i])
+        print('')
+        preds.append( prediction[0].argmax() )
+    
+    print(preds)
+    if KAGGLE_SUBMIT:
+        kaggle_submit(imgs, preds)
 
 ## make kaggle submission file
-with open('./submission_model.csv', 'w') as f:
-    f.write('file,species\n')
-    for index, img in enumerate(imgs):
-        f.write(os.path.basename(img) + ',' + str(preds[index]) + '\n') 
+def kaggle_submit(imgs, preds):
+    with open('./submission_model.csv', 'w') as f:
+        f.write(KAGGLE_HEADER + '\n')
+        
+        for index, img in enumerate(imgs):
+            f.write(os.path.basename(img) + ',' + str(preds[index]) + '\n') 
 
-call(["./chlabel.sh"])
+    call(["./chlabel.sh"])
+
+if SINGLE_PRED:
+    single_predict(IMAGE_FILE)
+    
+if MULT_PRED:
+    mult_predict(IMAGES_DIR)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
