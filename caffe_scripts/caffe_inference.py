@@ -7,27 +7,23 @@ import glob
 import numpy as np
 import caffe
 
-TEST = 'test hello world'
-
-SINGLE_PRED = False
-MULT_PRED = True
-
-KAGGLE_SUBMIT = True
-KAGGLE_HEADER = 'file,species'
-
 # Assign the structure of network
 MODEL_FILE = './deploy.prototxt' 
 PRETRAINED = './bvlc_googlenet_iter_300000.caffemodel'
 
 ## for single picture inference
+SINGLE_PRED = False
 IMAGE_FILE = '/mnt/sdb1/work/kaggle/Plant_Seedlings_Classification/origin_data/divide_train_val_90.10/val_data/Fat_Hen/2719ff172.png'
 
 ## for multiple pictures inference
+MULT_PRED = True
 IMAGES_DIR = '/mnt/sdb1/work/kaggle/Plant_Seedlings_Classification/origin_data/test/'
-
 MEAN_FILE = '/mnt/sdb1/work/kaggle/Plant_Seedlings_Classification/origin_data/divide_train_val_90.10/train_data/train_mean.npy'
 
 NUM_CLASS = 12
+
+KAGGLE_SUBMIT = True
+KAGGLE_HEADER = 'file,species'
 
 net = caffe.Classifier(MODEL_FILE, 
                        PRETRAINED, 
