@@ -6,7 +6,7 @@ import sys
 import os
 import caffe
 
-MODEL = 'train_val.prototxt'
+MODEL = 'deploy.prototxt'
 WEIGHTS = 'caffe_alexnet_train_iter_410000.caffemodel'
 IMG_PATH = './7f46a71db.png'
 
@@ -121,6 +121,10 @@ print( 'weight (filter): ', net.params['conv1'][0].data.shape )
 show_data(net.params['conv1'][0].data.reshape(96*3,11,11))
 
 
-
-
+## the probability of some class at last layer
+feat = net.blobs['prob'].data[0]
+print(net.blobs['prob'].data.shape)
+print(feat)
+plt.plot(feat.flat)
+plt.show()
 
