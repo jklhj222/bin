@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+# http://www.cnblogs.com/denny402/p/5105911.html
+# 20180506, to show the parameters and weights of the caffemodel
 
 import numpy as np
 import matplotlib.pyplot as plt
