@@ -11,10 +11,14 @@ def is_valid_image(filename):
         valid = False
     return valid
 
-pic_dir = './train_pic'
+pic_dir = './validation_pic/'
 
-dir_list = os.listdir("./train_pic")
+index = 0
+dir_list = os.listdir(pic_dir)
 for i in dir_list:
-    test = is_valid_image('./train_pic/' + i)
+    index += 1
+    test = is_valid_image(pic_dir + i)
     if test == False:
         print(i, test)
+    if index % 10000 == 0:
+        print(index)
