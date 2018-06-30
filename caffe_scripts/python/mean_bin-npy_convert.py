@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 #http://www.cnblogs.com/denny402/p/5102328.html
+# usage : 
+# python3 ./mean_bin-npy_convert.py  filename_of_mean.binaryprotoi(build from compute_image_mean)  filename_of_mean.npy
 import numpy as np
 import sys,caffe
 
