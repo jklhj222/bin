@@ -79,23 +79,11 @@ def kaggle_submit(imgs, preds):
 
     call(["./chlabel.sh"])
 
-if SINGLE_PRED:
-    single_predict(IMAGE_FILE)
+
+if __name__ == '__main__':
+    if SINGLE_PRED:
+        single_predict(IMAGE_FILE)
     
-if MULT_PRED:
-    mult_predict(IMAGES_DIR)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    if MULT_PRED:
+        mult_predict(IMAGES_DIR)
+    
