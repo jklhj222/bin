@@ -43,5 +43,5 @@ def random_select(srcDir, DividePercent):
             shutil.copy(os.path.join(srcDir, subdir, file),
                         os.path.join(srcDir, "val_data", subdir, file) )
         
-        
-random_select(srcDir, DividePercent)
+if __name__ == '__main__':        
+    random_select(srcDir, DividePercent)
