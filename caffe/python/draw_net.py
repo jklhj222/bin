@@ -2,13 +2,18 @@
 """
 Draw a graph of the net architecture.
 """
-from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
-from google.protobuf import text_format
+#from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
+#from google.protobuf import text_format
+#
+#import caffe
+#import caffe.draw
+#from caffe.proto import caffe_pb2
 
+from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
 import caffe
 import caffe.draw
+from google.protobuf import text_format
 from caffe.proto import caffe_pb2
-
 
 def parse_args():
     """Parse input arguments
