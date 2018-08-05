@@ -33,6 +33,7 @@ net = caffe.Classifier(MODEL_FILE,
                       ) 
 
 caffe.set_mode_gpu()
+caffe.set_device(0)
 
 ## for single picture inference
 def single_predict(img, num_class=NUM_CLASS):
