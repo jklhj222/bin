@@ -22,6 +22,11 @@ if __name__ == '__main__':
                         help='this is help test for optional argument 1',
                         dest='opt_arg1', 
                         default='test3')
+
+    parser.add_argument('--set_true',
+                        help='this is help test for store_true',
+                        action='store_true'
+                        )
     
     # if we didn't set the 'dest' parameter, 
     # the attribute name will become opt.optional_arg1
@@ -42,3 +47,4 @@ if __name__ == '__main__':
     print('optional arg1 :', args.opt_arg1)
 #    print('optional arg1 :', args.optional_arg1)
 
+    print('set_true :', args.set_true)
