@@ -201,8 +201,8 @@ def load_test_labels(idx_ubyte_file=test_labels_idx1_ubyte_file):
 def run():
     train_images = load_train_images()
     train_labels = load_train_labels()
-    # test_images = load_test_images()
-    # test_labels = load_test_labels()
+    test_images = load_test_images()
+    test_labels = load_test_labels()
 
     # 查看前十个数据及其标签以读取是否正确
     for i in range(10):
@@ -212,6 +212,8 @@ def run():
         plt.show()
     print('done')
 
+    return train_images, train_labels, test_images, test_labels
+
 if __name__ == '__main__':
-    run()
+    train_image, train_label, test_images, test_labels = run()
 
