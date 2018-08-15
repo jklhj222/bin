@@ -11,11 +11,13 @@ def read_hd5f_as_pic(h5_file=None,
                      show_pic_false=None):
     
     f = h5py.File(h5_file, 'r')
-    
+
     label = f['label']
     data  = f['data']
     
-    pic = np.array( data[index_of_pic]*255 )
+    pic = np.array( data[index_of_pic] )
+    
+    print(pic[index_of_pic])
     
     pic = np.uint8(pic)
     

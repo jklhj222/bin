@@ -62,7 +62,8 @@ def mult_predict(imgs_dir):
         prediction = net.predict([input_image], oversample = True)
         print(num, os.path.basename(img))
         for i in range(1,6):
-            print('predicted top-' + str(i) + ':', prediction[0].argsort()[-i])
+            print('predicted top-' + str(i) + ':', prediction[0].argsort()[-i],
+                  ',  prob = ', prediction[0][prediction[0].argsort()[-i]])
         print('')
         preds.append( prediction[0].argmax() )
     

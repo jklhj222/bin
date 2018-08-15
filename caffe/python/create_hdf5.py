@@ -19,7 +19,7 @@ parser.add_argument('--label_file',
                     help='the file list with label.')
 
 parser.add_argument('--output_hdf5',
-                    help='the output file of hdf5.')
+                    help='the output file name of hdf5.')
 
 parser.add_argument('--output_hdf5_list',
                     help='the source for reading for caffe.')
@@ -50,7 +50,7 @@ def create_hd5f(label_file=None,
         # for 8 labels
         #label_ = np.zeros( (len(lines), 8), dtype='f4' )
         # for 1 label
-        label_ = np.zeros( (len(lines), 1), dtype='f4' )
+        label_ = np.zeros( (len(lines), 1), dtype=np.int8 )
     
          
     for i, l in enumerate(lines):
@@ -78,7 +78,7 @@ def create_hd5f(label_file=None,
         label_[i] = sp[1]
          
     with h5py.File(output_hdf5,'w') as H:
-        H.create_dataset( 'data', data=data_ ) # note the name X given to the dataset!
+        H.create_dataset( 'data', data=data_*255 ) # note the name X given to the dataset!
         H.create_dataset( 'label', data=label_ ) # note the name y given to the dataset!
     with open(output_hdf5_list,'w') as L:
         L.write( os.path.join( os.getcwd() + '/' + output_hdf5) ) # list all h5 files you are going to use
