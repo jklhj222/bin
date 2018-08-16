@@ -30,6 +30,7 @@ parser.add_argument('--resize',
  
 parser.add_argument('--shuffle_file_false',
                    help='to set without shuffle the files.',
+                   default=False,
                    action='store_false')
 
 args = parser.parse_args()
