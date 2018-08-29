@@ -1,6 +1,10 @@
 #!/usr/bin/env python3
 """ Created on Wed Aug 29 23:11:15 2018@author: jklhj """
 
+train_net_path = './train.prototxt'
+test_net_path = './test.prototxt'
+solver_config_path = './solver.prototxt'
+
 ### define solver
 from caffe.proto import caffe_pb2
 
@@ -11,8 +15,8 @@ s = caffe_pb2.SolverParameter()
 s.random_seed = 0xCAFFE
 
 # Specify locations of the train and (maybe) test networks.
-s.train_net = './train.prototxt'
-s.test_net.append('./test.prototxt')
+s.train_net = train_net_path
+s.test_net.append(test_net_path)
 s.test_interval = 500  # Test after every 500 training iterations.
 s.test_iter.append(100) # Test on 100 batches each time we test.
 
@@ -51,5 +55,5 @@ s.snapshot_prefix = 'mnist/custom_net'
 s.solver_mode = caffe_pb2.SolverParameter.GPU
 
 # Write the solver to a temporary file and return its filename.
-with open('./solver.prototxt', 'w') as f:
+with open(solver_config_path, 'w') as f:
     f.write(str(s))
