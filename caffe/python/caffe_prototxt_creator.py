@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+## http://nbviewer.jupyter.org/github/BVLC/caffe/blob/master/examples/01-learning-lenet.ipynb
 """ Created on Thu Aug 30 10:07:18 2018 @author: jklhj """
 
 ### define solver
