@@ -3,7 +3,6 @@
 
 import argparse
 import cv2
-from math import floor
 
 parser = argparse.ArgumentParser(
         description='For Caffe ssd image detection (use python2), '
