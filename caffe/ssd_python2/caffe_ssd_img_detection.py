@@ -2,6 +2,8 @@
 """ Created on Wed Aug 29 16:05:01 2018 @author: jklhj """
 
 import argparse
+import cv2
+from math import floor
 
 parser = argparse.ArgumentParser(
         description='For Caffe ssd image detection (use python2), '
@@ -42,13 +44,16 @@ if not args.pretrain_model: print('Error: Need to set pretrained model: '
 if not args.image_file: print('Error: Need to set image file to detect: '
                               '--image_file')
 
+img = cv2.imread(args.image_file)
+height, width, channels = img.shape 
+
 import sys
 sys.path.insert(0, args.root_caffe_ssd)
 
 import caffe
 
 if args.set_gpu:
-    caffe.set_device(args.gpu_index)
+    caffe.set_device(int(args.gpu_index))
     caffe.set_mode_gpu()
 
 
@@ -92,9 +97,24 @@ if __name__ == '__main__':
       caffe_ssd_img_detection(args.deploy_model,
                               args.pretrain_model,
                               args.image_file)
-    
-    print(label)
-    
-    
-    
-    
+    label = list(label)
+    conf = list(conf) 
+    xmin = list(xmin*width)
+    xmax = list(xmax*width)
+    ymin = list(ymin*height)
+    ymax = list(ymax*height)   
+
+
+    print('label: ', list(label))
+    print('conf: ', list(conf))
+    print('xmin: ', map( int, xmin ))
+    print('xmax: ', map( int, xmax ))
+    print('ymin: ', map( int, ymin ))
+    print('ymax: ', map( int, ymax ))
+    print('imgag height, width, channels: ', height, width, channels)
+   
+    cv2.rectangle( img, (xmin[0], ymin[0]), (xmax[0], ymax[0]), (0, 0, 255), 5 ) 
+    font = cv2.FONT_HERSHEY_SIMPLEX
+    cv2.putText( img, str(label[0]), (xmin[0], ymin[0]), font, 0.7, (255, 255, 255), 1 )
+    cv2.imshow('test', img)
+    cv2.waitKey(0)
