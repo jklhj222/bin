@@ -3,6 +3,8 @@
 
 import argparse
 import cv2
+import os
+import shutil
 
 parser = argparse.ArgumentParser(
         description='For Caffe ssd image detection (use python2), '
@@ -16,6 +18,7 @@ parser.add_argument('--set_gpu',
                     help='set to use GPU.',
                     default=False,
                     action='store_true')
+
 parser.add_argument('--gpu_index',
                     help='the index of GPU.',
                     default=None)
@@ -28,11 +31,23 @@ parser.add_argument('--pretrain_model',
                     default='',
                     help='the pretrain model (*.caffemodel) of deployment.')
 
+parser.add_argument('--conf_threshold',
+                    default=0.5,
+                    help='the confidence threshold in ssd detection, default=0.5 .')
+
 parser.add_argument('--image_file',
                     default='',
                     help='the image file to detect.')
 
+parser.add_argument('--show_img',
+                    help='set to show the image with bounding boxes.',
+                    default=False,
+                    action='store_true')
+
 args = parser.parse_args()
+
+if (args.set_gpu) and (not args.gpu_index): print('Error: Need to set the index of GPU: '
+                                                  '--gpu_index')
 
 if not args.root_caffe_ssd: print('Error: Need to set the caffe ssd root: '
                                   '--root_caffe_ssd')
@@ -50,11 +65,37 @@ import sys
 sys.path.insert(0, args.root_caffe_ssd)
 
 import caffe
+from caffe.proto import caffe_pb2
+from google.protobuf import text_format
 
 if args.set_gpu:
     caffe.set_device(int(args.gpu_index))
     caffe.set_mode_gpu()
 
+def get_modify_output_layer_param(conf_threshold, deploy_model):
+    net = caffe_pb2.NetParameter()
+
+    with open(deploy_model, 'r') as f:
+        text_format.Merge(f.read(), net)
+    
+    layerName = [ l.name for l in net.layer ]
+    idx = layerName.index('detection_out')
+    
+    output_layer = net.layer[idx]
+    
+    # modify output parameter
+    output_layer.detection_output_param.confidence_threshold = float(conf_threshold)
+    
+    # get output parameter
+    LabelMapFile = output_layer.detection_output_param.save_output_param.label_map_file
+
+    shutil.copyfile(deploy_model, deploy_model + '_orig')
+    os.remove(deploy_model)
+
+    with open(deploy_model, 'w') as f:
+        f.write(str(net))    
+
+    return LabelMapFile, conf_threshold
 
 def caffe_ssd_img_detection(deploy_model,
                             pretrain_model,
@@ -89,8 +130,22 @@ def caffe_ssd_img_detection(deploy_model,
     det_ymax  = detections[0,0,:,6]
 
     return det_label, det_conf, det_xmin, det_ymin, det_xmax, det_ymax
-    
+
+def show_image(img, xmin, xmax, ymin, ymax, label_names):
+    for i in range(len(xmin)):
+        cv2.rectangle( img, (xmin[i], ymin[i]), (xmax[i], ymax[i]), (0, 0, 255), 3 ) 
+        font = cv2.FONT_HERSHEY_SIMPLEX
+        cv2.putText( img, str(label_names[i]), 
+                     (xmin[i], ymin[i]), font, 0.7, (255, 255, 255), 1 )
+        cv2.putText( img, '{:.2f}'.format(conf[i]), 
+                     (xmin[i], ymin[i]-20), font, 0.7, (255, 255, 255), 1 )
+
+    cv2.imshow('Image', img)
+    cv2.waitKey(0)
+
 if __name__ == '__main__':
+
+    labelmap_file, conf_thres = get_modify_output_layer_param(args.conf_threshold, args.deploy_model)
     
     label, conf, xmin, ymin, xmax, ymax = \
       caffe_ssd_img_detection(args.deploy_model,
@@ -98,22 +153,29 @@ if __name__ == '__main__':
                               args.image_file)
     label = list(label)
     conf = list(conf) 
-    xmin = list(xmin*width)
-    xmax = list(xmax*width)
-    ymin = list(ymin*height)
-    ymax = list(ymax*height)   
+    xmin = map( int, list(xmin*width) )
+    xmax = map( int, list(xmax*width) )
+    ymin = map( int, list(ymin*height) )
+    ymax = map( int, list(ymax*height) )
 
+    # get label names
+    label_names = []
+    with open(labelmap_file, 'r') as f:
+        labelmap = caffe_pb2.LabelMap()
+        text_format.Merge(str(f.read()), labelmap)
+        for i in label:
+            label_names.append( str(labelmap.item[int(i)].display_name) )
 
+    print('conf threshold: ', conf_thres)
     print('label: ', list(label))
+    print('label name:', label_names)
     print('conf: ', list(conf))
     print('xmin: ', map( int, xmin ))
     print('xmax: ', map( int, xmax ))
     print('ymin: ', map( int, ymin ))
     print('ymax: ', map( int, ymax ))
-    print('imgag height, width, channels: ', height, width, channels)
-   
-    cv2.rectangle( img, (xmin[0], ymin[0]), (xmax[0], ymax[0]), (0, 0, 255), 5 ) 
-    font = cv2.FONT_HERSHEY_SIMPLEX
-    cv2.putText( img, str(label[0]), (xmin[0], ymin[0]), font, 0.7, (255, 255, 255), 1 )
-    cv2.imshow('test', img)
-    cv2.waitKey(0)
+    print('image height, width, channels: ', height, width, channels)
+
+    if args.show_img:
+        show_image(img, xmin, xmax, ymin, ymax, label_names)
+
