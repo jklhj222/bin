@@ -6,7 +6,7 @@ import cv2
 
 parser = argparse.ArgumentParser(
         description='For Caffe ssd image detection (use python2), '
-                     'and return the coordinates of bounding box.')
+                    'and return the coordinates of the bounding boxes.')
 
 parser.add_argument('--root_caffe_ssd',
                     default='',
