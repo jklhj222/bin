@@ -145,7 +145,9 @@ def show_image(img, xmin, xmax, ymin, ymax, label_names):
 
 if __name__ == '__main__':
 
-    labelmap_file, conf_thres = get_modify_output_layer_param(args.conf_threshold, args.deploy_model)
+    labelmap_file, conf_thres = \
+      get_modify_output_layer_param(args.conf_threshold, 
+                                    args.deploy_model)
     
     label, conf, xmin, ymin, xmax, ymax = \
       caffe_ssd_img_detection(args.deploy_model,
