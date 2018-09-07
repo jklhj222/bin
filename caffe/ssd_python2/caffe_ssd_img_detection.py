@@ -10,7 +10,7 @@ parser = argparse.ArgumentParser(
 
 parser.add_argument('--root_caffe_ssd',
                     default='',
-                    help='Caffe pycaffe directory (python2).')
+                    help='Caffe ssd pycaffe directory (python2).')
 
 parser.add_argument('--set_gpu',
                     help='set to use GPU.',
