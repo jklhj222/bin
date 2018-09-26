@@ -12,7 +12,7 @@ parser = argparse.ArgumentParser(
 
 parser.add_argument('--root_caffe_ssd',
                     default='',
-                    help='Caffe ssd pycaffe directory (python2).')
+                    help='Caffe ssd directory (python2).')
 
 parser.add_argument('--set_gpu',
                     help='set to use GPU.',
@@ -46,7 +46,7 @@ parser.add_argument('--show_img',
 
 args = parser.parse_args()
 
-if (args.set_gpu) and (not args.gpu_index): print('Error: Need to set the index of GPU: '
+if args.set_gpu and not args.gpu_index: print('Error: Need to set the index of GPU: '
                                                   '--gpu_index')
 
 if not args.root_caffe_ssd: print('Error: Need to set the caffe ssd root: '
@@ -62,7 +62,7 @@ img = cv2.imread(args.image_file)
 height, width, channels = img.shape 
 
 import sys
-sys.path.insert(0, args.root_caffe_ssd)
+sys.path.insert(0, args.root_caffe_ssd + '/python/')
 
 import caffe
 from caffe.proto import caffe_pb2

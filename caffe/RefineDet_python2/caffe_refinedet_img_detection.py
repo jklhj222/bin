@@ -7,12 +7,12 @@ import os
 import shutil
 
 parser = argparse.ArgumentParser(
-        description='For Caffe ssd image detection (use python2), '
+        description='For Caffe RefineDet image detection (use python2), '
                     'and return the coordinates of the bounding boxes.')
 
-parser.add_argument('--root_caffe_ssd',
+parser.add_argument('--root_caffe_refinedet',
                     default='',
-                    help='Caffe ssd pycaffe directory (python2).')
+                    help='Caffe refinedet directory (python2).')
 
 parser.add_argument('--set_gpu',
                     help='set to use GPU.',
@@ -50,11 +50,11 @@ parser.add_argument('--show_img',
 
 args = parser.parse_args()
 
-if (args.set_gpu) and (not args.gpu_index): print('Error: Need to set the index of GPU: '
+if args.set_gpu and not args.gpu_index: print('Error: Need to set the index of GPU: '
                                                   '--gpu_index')
 
-if not args.root_caffe_ssd: print('Error: Need to set the caffe ssd root: '
-                                  '--root_caffe_ssd')
+if not args.root_caffe_refinedet: print('Error: Need to set the caffe ssd root: '
+                                  '--root_caffe_refinedet')
 if not args.deploy_model: print('Error: Need to set deploy prototxt file: '
                                 '--deploy_model')
 if not args.pretrain_model: print('Error: Need to set pretrained model: '
@@ -68,7 +68,7 @@ img = cv2.imread(args.image_file)
 height, width, channels = img.shape 
 
 import sys
-sys.path.insert(0, args.root_caffe_ssd)
+sys.path.insert(0, args.root_caffe_refinedet + '/python/')
 
 import caffe
 from caffe.proto import caffe_pb2
