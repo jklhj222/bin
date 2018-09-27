@@ -2,6 +2,7 @@
 """ Created on Wed Sep 26 14:03:10 2018 @author: jklhj """
 
 import argparse
+import getpass
 import os
 import sys
 from subprocess import call
@@ -13,17 +14,12 @@ from glob import glob
 NAME_CONTAINER = 'vatic00'
 DIRNAME_VATIC = 'data_vatic'
 LABEL_LIST = 'labels.txt'
-
-# remove old data_vatic directory
-if os.path.exists('data_vatic'): call(['sudo', 'rm', '-r', 'data_vatic'])
+USER_NAME = getpass.getuser()
+print(USER_NAME)
 
 # set arguments
 parser = argparse.ArgumentParser(
         description='For labeling tool "vatic". ')
-
-parser.add_argument('--user_name',
-                    default='',
-                    help='the user name (not superuser).')
 
 parser.add_argument('--video_path',
                     default='',
@@ -34,20 +30,17 @@ parser.add_argument('--image_quality',
                     help='the quality of output images. Default=80')
 
 parser.add_argument('--check_labels',
-                    help='set to check the results after splitting the video.',
+                    help='set to check the results after splitting the video.'
+                         ' Default=False',
                     default=False,
                     action='store_true')
 
 parser.add_argument('--check_labels_only',
-                    help='set to check the results only.',
+                    help='set to check the results only. Default=False',
                     default=False,
                     action='store_true')
 
 args = parser.parse_args()
-
-if not args.user_name and not args.check_labels_only: 
-    print('Error: Need to set user name (not superuser): --user_name')
-    sys.exit()
 
 if not args.video_path: 
     print('Error: Need to set the path of video file: --video_path')
@@ -70,6 +63,9 @@ else:
 video_basename = os.path.basename(args.video_path)
 data_dir = 'data_' + os.path.splitext(video_basename)[0]
 images_dir = 'data_' + os.path.splitext(video_basename)[0] + '/images'
+
+# remove old data directory
+if os.path.exists('data_vatic'): call(['sudo', 'rm', '-r', 'data_vatic'])
 
 if not os.path.exists( images_dir ):
     os.makedirs( images_dir )
@@ -107,17 +103,18 @@ def exc_vatic_docker(video=args.video_path):
 
     shutil.copy(args.video_path, 'data_vatic/videos_in/')
     shutil.copy(LABEL_LIST, 'data_vatic/')
+    shutil.copy(LABEL_LIST, data_dir + '/')
     
     print('------------------------- Reminder ----------------------------\n\n'
           'Now we are going to start vatic_docker, '
-          'the superuser premission is needed.\n'
+          'the superuser permission is needed.\n'
           'If the container', NAME_CONTAINER, 'already exists, remove it.\n'
           'Open browser with localhost:8111/directory .\n'
           'After finishing vatic, key in "exit" to leave the container.\n\n'
           '----------------------------------------------------------------\n')
 
     stop = input('Video split finished, press Enter to start vatic_docker, '
-                 'have to enter the sudo password.'
+                 'have to enter the sudo password. '
                  'Then open browser with localhost:8111/directory .')
     
     if stop == '':
@@ -182,15 +179,19 @@ def vaticXMLtoYOLO(data_dir=data_dir):
                         sys.exit()
                  
                     # to show the images with bounding box
-                    image = cv2.imread(image_name)
-                    print(image_name)
-                    print(x1, y1, x2, y2, width0, width, height0, height)
-                    
-                    cv2.rectangle(image, (x1, y1), (x2, y2), (0, 0, 255), 5)
-                    cv2.imshow('image', cv2.resize(image, (500, 500)))
-                    cv2.imshow('image', image)
-                    cv2.waitKey(1)
-                    
+                    if args.check_labels:
+                        image = cv2.imread(image_name)
+                        print(image_name)
+                        print(x1, y1, x2, y2, width0, width, height0, height)
+                        
+                        cv2.rectangle(image, (x1, y1), (x2, y2), (0,0,255), 5)
+                        cv2.imshow('Image', 
+                                   cv2.resize(image, 
+                                              (int(width0*0.6),
+                                               int(height0*0.6))))
+                        
+                        cv2.waitKey(1)
+                        
                     xc = (x1 + x2)/2.0/width0
                     yc = (y1 + y2)/2.0/height0
                     xw = abs(x2 - x1)*1.0/width0
@@ -217,8 +218,10 @@ def vaticXMLtoYOLO(data_dir=data_dir):
         
         call(['touch', data_dir + '/labels/' + textname])
 
-        call(['sudo', 'chown', '-R', args.user_name + ':' + args.user_name,
-              data_dir, 'data_vatic'])
+    shutil.copy('data_vatic/output.xml', data_dir + '/')
+
+    call(['sudo', 'chown', '-R', USER_NAME + ':' + USER_NAME,
+          data_dir, 'data_vatic'])
 
 
 def yolo_xymm(bbox_yolo):#,size):
@@ -290,9 +293,11 @@ def check_labels(data_dir=data_dir):
                 cv2.putText(img, category, (xmin, ymin), font, 
                             1, (255, 255, 255), 2, cv2.LINE_AA)
             
-#            plt.imshow(img)
-#            plt.show()
-            cv2.imshow('Image', img)
+            print(img_width, img_height)
+            cv2.imshow('Image', 
+                       cv2.resize(img, 
+                                  (int(img_width*0.6), int(img_height*0.6))))
+            
             if cv2.waitKey(time_interval) & 0xff == ord('q'):
                 break
     
@@ -305,13 +310,11 @@ if __name__ == '__main__':
         
         exc_vatic_docker(video=args.video_path)
         
-        call(['sudo', 'docker', 'rm', 'vatic00'])
+        call(['sudo', 'docker', 'rm', NAME_CONTAINER])
         
         vaticXMLtoYOLO(data_dir=data_dir)
-   
-#        if args.check_labels:
-#             check_labels(data_dir)
+
     else: 
         check_labels(data_dir)
     
-    print('Program finished.')
+    print('\nProgram finished.')
