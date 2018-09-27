@@ -65,7 +65,10 @@ data_dir = 'data_' + os.path.splitext(video_basename)[0]
 images_dir = 'data_' + os.path.splitext(video_basename)[0] + '/images'
 
 # remove old data directory
-if os.path.exists('data_vatic'): call(['sudo', 'rm', '-r', 'data_vatic'])
+if os.path.exists('data_vatic'): 
+    yes_no = input('data_vatic directory already exists, remove it? (y/n) :\n')
+    if yes_no == 'y':
+        call(['sudo', 'rm', '-r', 'data_vatic'])
 
 if not os.path.exists( images_dir ):
     os.makedirs( images_dir )
