@@ -12,9 +12,9 @@ with open('train_orig.csv', newline='') as f:
     for i, row in enumerate(rows):
         print(i, row)
         
-    print('total rows: ', i)
+    print('total rows: ', i+1)
     
-    total_idx = [idx for idx in range(i)]
+    total_idx = [idx for idx in range(i+1)]
     
     train_set_idx = sorted(random.sample(total_idx, 
                                          int(i*train_set_percentage)))
@@ -28,7 +28,6 @@ with open('train_orig.csv', newline='') as f:
     val_set = []
     for i in val_set_idx:
         val_set.append(rows[i])
-
         
 with open('train.csv', 'w', newline='') as f:
     train_writer = csv.writer(f)
