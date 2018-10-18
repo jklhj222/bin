@@ -18,4 +18,4 @@
 
 4. Set the environment path in caffe_train.py
    execute caffe_train.py: 
-    python3 caffe_train.py 2> log
+   python3 caffe_train.py 2> log
