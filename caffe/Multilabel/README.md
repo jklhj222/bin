@@ -1,4 +1,4 @@
-# Multilabel image classification with Caffe
+#### Multilabel image classification with Caffe
 
 1. Put multilabel_datalayers.py to $CAFFE_ROOT/examples/pycaffe/layers/
 
