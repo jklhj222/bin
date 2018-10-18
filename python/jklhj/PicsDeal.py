@@ -51,3 +51,13 @@ class CutImage():
         return img.size, region.size
 
 
+class TransformImage():
+
+    def MergeRGB(picR, picG, picB, picOut):
+        R = cv2.imread(picR, cv2.IMREAD_GRAYSCALE)
+        G = cv2.imread(picG, cv2.IMREAD_GRAYSCALE)
+        B = cv2.imread(picB, cv2.IMREAD_GRAYSCALE)
+
+        RGB = cv2.merge([B, G, R])
+
+        cv2.imwrite(picOut, RGB) 
