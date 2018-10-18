@@ -1,6 +1,6 @@
 # Multilabel image classification with Caffe
 
-1. Put multilabel_datalayers.py to `$CAFFE_ROOT/examples/pycaffe/layers/`
+1. Put `multilabel_datalayers.py` to `$CAFFE_ROOT/examples/pycaffe/layers/`
 
 2. Build train and val model file, then replace the data layer with:
    `type: "Python"`
