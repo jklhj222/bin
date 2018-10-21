@@ -1,3 +1,4 @@
+#
 layer {
   name: "data"
   type: "Python"
@@ -6,9 +7,7 @@ layer {
   python_param {
     module: "multilabel_datalayers"
     layer: "MultilabelDataLayerSync"
-    param_str: "{\'split\': \'train\', \'batch_size\': 128, \'im_shape\': [512, 512], 
-                 \'dataset_root\': \'/home/hugh/pkg/local/caffe/data/Human_Protein_Atlas_Image_Classification\', 
-                 \'number_class\': 28, \'img_ext\': \'.png\'}"
+    param_str: "{\'split\': \'train\', \'batch_size\': 64, \'im_shape\': [227, 227], \'dataset_root\': \'/mnt/sdc1/work/VOC2012/\', \'number_classes\': 20, \'img_ext\': \'.jpg\'}"
   }
 }
 layer {
@@ -209,7 +208,7 @@ layer {
   bottom: "fc7"
   top: "score"
   inner_product_param {
-    num_output: 28
+    num_output: 20
   }
 }
 layer {
