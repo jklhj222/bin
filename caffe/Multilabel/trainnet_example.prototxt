@@ -7,7 +7,7 @@ layer {
     module: "multilabel_datalayers"
     layer: "MultilabelDataLayerSync"
     param_str: "{\'split\': \'train\', \'batch_size\': 128, \'im_shape\': [512, 512], 
-                 \'human_protein_root\': \'/home/hugh/pkg/local/caffe/data/Human_Protein_Atlas_Image_Classification\', 
+                 \'dataset_root\': \'/home/hugh/pkg/local/caffe/data/Human_Protein_Atlas_Image_Classification\', 
                  \'number_class\': 28, \'img_ext\': \'.png\'}"
   }
 }

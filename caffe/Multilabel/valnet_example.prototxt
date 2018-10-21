@@ -4,7 +4,7 @@ layer {
   top: "data"
   top: "label"
   python_param {
-    module: "multilabel_datalayers_tmp"
+    module: "multilabel_datalayers"
     layer: "MultilabelDataLayerSync"
     param_str: "{\'split\': \'val\', \'batch_size\': 128, \'im_shape\': [512, 512], 
                  \'dataset_root\': \'/home/hugh/pkg/local/caffe/data/Human_Protein_Atlas_Image_Classification\', 
