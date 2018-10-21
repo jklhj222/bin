@@ -1,0 +1,17 @@
+average_loss: 25
+base_lr: 0.0001
+display: 1
+gamma: 0.1
+iter_size: 1
+lr_policy: "step"
+stepsize: 30000
+max_iter: 100000
+momentum: 0.9
+snapshot: 1000
+snapshot_prefix: "./job1/pascal_multilabel_snapshot"
+test_initialization: false
+test_interval: 1000
+test_iter: 46 
+test_net: "./valnet.prototxt"
+train_net: "./trainnet.prototxt"
+weight_decay: 0.0005
