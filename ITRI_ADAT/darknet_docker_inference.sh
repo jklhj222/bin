@@ -1,6 +1,7 @@
 #!/bin/bash
-## docker import adatapi_hugh_20181107.tar adatapi_hugh_20181107
-## docker import adatdarknet_v2.4_hugh_20181107.tar adatdarknet_v2.4_hugh_20181107
+## 0. Import web service and darknet docker images
+##    docker load -i adatapi_hugh_20181107.tar 
+##    docker load -i adatdarknet_v2.4_hugh_20181107.tar
 
 ## 1. start the web service container
 ADATAPI_CONTAINER_NAME='adatapi_hugh'
@@ -42,7 +43,7 @@ rm -f "$DATA_PATH"/*.txt
 
 ## 3. execute darknet yolo detection
 #nvidia-docker create --name "$DARKNET_CONTAINER_NAME" -e DISPLAY="$DISPLAY" -v /tmp/.X11-unix/:/tmp/.X11-unix/ -v "$CFG_DIR_PATH":/root/darknet_v2.4/adat_cfg -v "$WEIGHTS_DIR_PATH":/root/darknet_v2.4/adat_weights --mount type=bind,source="$DATA_PATH",target=/data/ --mount type=bind,source="$UPDATE_PATH",target=/root/update/ -it adatdarknet_v2.4 /bin/bash
-nvidia-docker create --name "$DARKNET_CONTAINER_NAME" -e DISPLAY="$DISPLAY" -v /tmp/.X11-unix/:/tmp/.X11-unix/ -v "$CFG_DIR_PATH":/root/darknet_v2.4/adat_cfg -v "$WEIGHTS_DIR_PATH":/root/darknet_v2.4/adat_weights --mount type=bind,source="$DATA_PATH",target=/data/ -it adatdarknet_v2.4 /bin/bash
+nvidia-docker create --name "$DARKNET_CONTAINER_NAME" -e DISPLAY="$DISPLAY" -v /tmp/.X11-unix/:/tmp/.X11-unix/ -v "$CFG_DIR_PATH":/root/darknet_v2.4/adat_cfg -v "$WEIGHTS_DIR_PATH":/root/darknet_v2.4/adat_weights --mount type=bind,source="$DATA_PATH",target=/data/ -it adatdarknet_v2.4_hugh_20181107 /bin/bash
 
 nvidia-docker start "$DARKNET_CONTAINER_NAME"
 
