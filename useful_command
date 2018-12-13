@@ -1,0 +1,12 @@
+# 列出系統上最耗費記憶體的程式
+ps -eo pid,ppid,cmd,%mem,%cpu --sort=-%mem | head 
+
+# 会使硬盘在一段时间（未活动）后减慢运行速度。 将 x 替换如下：0 表示禁用此机制，导致硬盘持续运行。值 1 到 240 表示的时间为所选的值乘以 5 秒。 值 241 到 251 对应的时间分别是 30 分钟的 1 到 11 倍。
+hdparm -S 120 /dev/sdd
+
+# parallel version of gzip
+tar -cf - train | pigz -p 8 > train.tar.gz
+
+# Unix timestamp seconds since 1970-01-01 00:00:00 UTC
+date +%s     --  second
+date +%s%N   --  nanosecond
