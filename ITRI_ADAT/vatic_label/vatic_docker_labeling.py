@@ -296,7 +296,7 @@ def check_labels(data_dir=data_dir):
                 cv2.putText(img, category, (xmin, ymin), font, 
                             1, (255, 255, 255), 2, cv2.LINE_AA)
             
-            print(img_width, img_height)
+            print('{:d}/{:d}'.format(i, len(zipped)),  img_width, img_height)
             cv2.imshow('Image', 
                        cv2.resize(img, 
                                   (int(img_width*0.6), int(img_height*0.6))))
