@@ -40,6 +40,11 @@ parser.add_argument('--check_labels_only',
                     default=False,
                     action='store_true')
 
+parser.add_argument('--show_images_with_no_labels',
+                    help='set to show the images without any labels. Default=False',
+                    default=False,
+                    action='store_true')
+
 args = parser.parse_args()
 
 if not args.video_path: 
@@ -269,7 +274,7 @@ def check_labels(data_dir=data_dir):
     
     for i, j in enumerate(zipped):
         txt_path, img_path = j
-        labeled = False
+        labeled = False if not args.show_images_with_no_labels else True
         labels_list = []
         
         with open(txt_path) as f:
@@ -279,8 +284,10 @@ def check_labels(data_dir=data_dir):
                 bbox_yolo = txt.split()
                 label = yolo_xymm(bbox_yolo)
                 labels_list.append(label)
-            
+    
+        print(allshow, labeled)        
         if allshow or labeled:
+            print('test2')
             img = cv2.imread(img_path)
             img_height, img_width = img.shape[0:2]
             
