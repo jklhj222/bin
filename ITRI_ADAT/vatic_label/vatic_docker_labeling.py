@@ -285,9 +285,7 @@ def check_labels(data_dir=data_dir):
                 label = yolo_xymm(bbox_yolo)
                 labels_list.append(label)
     
-        print(allshow, labeled)        
         if allshow or labeled:
-            print('test2')
             img = cv2.imread(img_path)
             img_height, img_width = img.shape[0:2]
             
