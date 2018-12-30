@@ -211,7 +211,7 @@ def vaticXMLtoYOLO(data_dir=data_dir):
                                  str(xc) + ' ' +
                                  str(yc) + ' ' +
                                  str(xw) + ' ' +
-                                 str(yh) + ' ' )
+                                 str(yh) + ' \n' )
     
     # touch the files that without bounding boxes
     imagenames = glob(data_dir + '/images/*')
