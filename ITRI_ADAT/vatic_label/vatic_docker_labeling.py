@@ -40,6 +40,11 @@ parser.add_argument('--check_labels_only',
                     default=False,
                     action='store_true')
 
+parser.add_argument('--vatic_only',
+                    help='set to open vatic docker only. Default=False',
+                    default=False,
+                    action='store_true')
+
 parser.add_argument('--show_images_with_no_labels',
                     help='set to show the images without any labels. Default=False',
                     default=False,
@@ -70,7 +75,7 @@ data_dir = 'data_' + os.path.splitext(video_basename)[0]
 images_dir = 'data_' + os.path.splitext(video_basename)[0] + '/images'
 
 # remove old data directory
-if os.path.exists('data_vatic'): 
+if os.path.exists('data_vatic') and not args.vatic_only: 
     yes_no = input('data_vatic directory already exists, remove it? (y/n) :\n')
     if yes_no == 'y':
         call(['sudo', 'rm', '-r', 'data_vatic'])
@@ -126,11 +131,15 @@ def exc_vatic_docker(video=args.video_path):
                  'Then open browser with localhost:8111/directory .')
     
     if stop == '':
+        if args.vatic_only:
+            call(['chmod', 'a+w', os.getcwd() + '/data_vatic/output.xml'])
+
         docker_command = ['sudo', 'docker', 'run', '-it', '--name',
                           NAME_CONTAINER, '-p', '8111:80', '-v',
                           os.getcwd() + '/data_vatic:/root/vatic/data',
                           'npsvisionlab/vatic-docker', '/bin/bash', '-C',
                           '/root/vatic/example.sh']
+
         call(docker_command)
    
     
@@ -311,7 +320,7 @@ def check_labels(data_dir=data_dir):
     
 
 if __name__ == '__main__':
-    if not args.check_labels_only:
+    if not args.check_labels_only and not args.vatic_only:
         cut_video_to_frames(video=args.video_path,
                             frames_dir=images_dir,
                             quality=args.image_quality)
@@ -322,7 +331,14 @@ if __name__ == '__main__':
         
         vaticXMLtoYOLO(data_dir=data_dir)
 
-    else: 
+    elif args.check_labels_only and not args.vatic_only: 
         check_labels(data_dir)
-    
+
+    elif args.vatic_only:
+        exc_vatic_docker(video=args.video_path)
+        
+        call(['sudo', 'docker', 'rm', NAME_CONTAINER])
+        
+        vaticXMLtoYOLO(data_dir=data_dir)
+        
     print('\nProgram finished.')
