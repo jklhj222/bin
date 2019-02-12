@@ -49,7 +49,7 @@ def yolo_xymm(bbox_yolo,height_image,width_image):
   y_bottom = int( (y_center_bbox+height_bbox/2.) * height_image )
   return category, x_left, y_top, x_right, y_bottom
 
-colors = [(250,250,250),(5,250,250),(250,5,250),(250,250,5)]
+colors = [(250,250,250),(5,250,250),(250,5,250),(250,250,5),(10,100,200),(20,80,130),(30,60,210)]
 
 forward = True
 count = 0
