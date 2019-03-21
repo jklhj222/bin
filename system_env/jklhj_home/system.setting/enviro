@@ -1,0 +1,38 @@
+##
+# 2018.07.07
+LANG=C xdg-user-dirs-gtk-update  ( change chiness dir to english)
+
+cd /usr/lib/x86_64-linux-gnu
+sudo ln -s libhdf5_serial.so libhdf5.so
+sudo ln -s libhdf5_serial_hl.so.10.0.2 libhdf5_hl.so
+
+cd /usr/bin
+sudo ln -s aclocal-1.15 aclocal-1.14
+sudo ln -s automake-1.15 automake-1.14
+
+# 2018.07.08
+turn off the auto-update of ubuntu
+
+# -------------------------- 2018.07.08 ---------------------------
+
+# 2018.07.15
+sudo ln -s /usr/lib/x86_64-linux-gnu/libboost_python-py35.so.1.58.0 /usr/lib/x86_64-linux-gnu/libboost_python3.so
+sudo ln -s /usr/local/cuda/lib64/libcudart.so.9.0.176 /usr/lib/x86_64-linux-gnu/libcudart.so.9.0
+sudo ln -s /usr/local/cuda/lib64/libcublas.so.9.0.425 /usr/lib/x86_64-linux-gnu/libcublas.so.9.0
+sudo ln -s /usr/local/cuda/lib64/libcurand.so.9.0.176 /usr/lib/x86_64-linux-gnu/libcurand.so.9.0
+sudo ln -s /usr/local/cuda/lib64/libcudnn.so.7.0.5 /usr/lib/x86_64-linux-gnu/libcudnn.so.7
+
+# 2018.07.15
+sudo ln -s /usr/local/cuda/lib64/libcusolver.so.9.0.176 /usr/lib/x86_64-linux-gnu/libcusolver.so.9.0
+sudo ln -s /usr/local/cuda/lib64/libcufft.so.9.0.176 /usr/lib/x86_64-linux-gnu/libcufft.so.9.0
+sudo ln -s /usr/lib/nvidia-390/libnvidia-fatbinaryloader.so.390.67 /usr/lib/x86_64-linux-gnu/libnvidia-fatbinaryloader.so.390.67
+In spyder, preferences -> python interpreter, turn off User Module Reloader, then restart kernel.
+
+# -------------------------- 2018.07.15 ---------------------------
+
+# 2018.10.10
+add below in ~/.bashrc
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/cuda-9.0/extras/CUPTI/lib64
+
+# -------------------------- 2018.10.28 ---------------------------
+# -------------------------- 2019.01.30 ---------------------------

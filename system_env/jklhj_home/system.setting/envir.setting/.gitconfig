@@ -1,0 +1,23 @@
+[user]
+	email = jklhj222@gmail.com
+	name = jklhj
+[alias]
+	tree = log --graph --decorate --pretty=oneline --abbrev-commit
+	stt = status
+	logr = log --reverse
+	loga = log --graph --oneline --all --decorate -10
+	comm = commit -m
+	ck = checkout
+[filter "lfs"]
+	clean = git-lfs clean -- %f
+	smudge = git-lfs smudge -- %f
+	process = git-lfs filter-process
+	required = true
+[merge]
+	tool = vimdiff
+[gui]
+	recentrepo = E:/Dropbox/work/Git_test/test15.1
+[push]
+	default = simple
+[core]
+	editor = vim
