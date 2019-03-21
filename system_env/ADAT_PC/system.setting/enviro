@@ -1,0 +1,58 @@
+##
+
+# 2018.07.12
+LANG=C xdg-user-dirs-gtk-update  ( change chiness dir to english)
+
+# 2018.07.13
+sudo ln -s /usr/lib/x86_64-linux-gnu/libboost_python-py35.so.1.58.0 /usr/lib/x86_64-linux-gnu/libboost_python3.so
+sudo ln -s /usr/local/cuda/lib64/libcudart.so.9.0.176 /usr/lib/x86_64-linux-gnu/libcudart.so.9.0
+sudo ln -s /usr/local/cuda/lib64/libcublas.so.9.0.425 /usr/lib/x86_64-linux-gnu/libcublas.so.9.0
+sudo ln -s /usr/local/cuda/lib64/libcurand.so.9.0.176 /usr/lib/x86_64-linux-gnu/libcurand.so.9.0
+sudo ln -s /usr/local/cuda/lib64/libcudnn.so.7.0.5 /usr/lib/x86_64-linux-gnu/libcudnn.so.7
+
+# 2018.07.13 (for tensorflow in spyder)
+sudo ln -s /usr/local/cuda/lib64/libcusolver.so.9.0.176 /usr/lib/x86_64-linux-gnu/libcusolver.so.9.0
+sudo ln -s /usr/local/cuda/lib64/libcufft.so.9.0.176 /usr/lib/x86_64-linux-gnu/libcufft.so.9.0
+sudo ln -s /usr/lib/nvidia-390/libnvidia-fatbinaryloader.so.390.67 /usr/lib/x86_64-linux-gnu/libnvidia-fatbinaryloader.so.390.67
+In spyder, preferences -> python interpreter, turn off User Module Reloader, then restart kernel.
+
+sudo ln -s /usr/bin/aclocal-1.15 /usr/bin/aclocal-1.14
+sudo ln -s /usr/bin/automake-1.15 /usr/bin/automake-1.14
+sudo ln -s /usr/share/automake-1.14 /usr/share/automake-1.15
+
+cd /usr/bin
+sudo ln -s aclocal-1.15 aclocal-1.14
+
+cd /usr/lib/x86_64-linux-gnu
+sudo ln -s libhdf5_serial.so libhdf5.so
+sudo ln -s libhdf5_serial_hl.so.10.0.2 libhdf5_hl.so
+
+# ------------------------------------ 2018.07.13 --------------------------------------
+
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib  (in ~/.bashrc)
+
+# ------------------------------------ 2018.07.16 --------------------------------------
+
+sudo ln -s /usr/lib/x86_64-linux-gnu/libturbojpeg.so.0.1.0 /usr/lib/x86_64-linux-gnu/libturbojpeg.so   #2018.07.19
+
+
+In ~/.jupyter/jupyter_notebook_config.py (for setting ipython notebook default browser to firefox)     #2018.08.08
+add -->
+## The full path to a certificate authority certificate for SSL/TLS client
+#  authentication.
+#c.NotebookApp.client_ca = ''
+import webbrowser
+webbrowser.register('firefox', None, webbrowser.GenericBrowser('/usr/bin/firefox'))
+c.NotebookApp.browser = 'firefox' 
+
+# ------------------------------------ 2018.08.30 --------------------------------------
+
+# ------------------------------------ 2018.10.30 --------------------------------------
+
+# add hugh to docker group  2018.10.31
+# http://www.markjour.com/article/docker-no-root.html
+sudo gpasswd -a ${USER} docker
+sudo service docker restart
+newgrp - docker
+
+# ------------------------------------ 2019.01.22 --------------------------------------
