@@ -11,7 +11,7 @@ import os, sys
 from config import DefaultConfig as DC
 
 train_transform = T.Compose([
-#        T.Resize(32),
+        T.Resize(224),
 #        T.RandomResizedCrop(224),
         T.RandomHorizontalFlip(),
         T.RandomVerticalFlip(),
@@ -22,6 +22,8 @@ train_dir = DC.train_dir
 train_data = ImageFolder(train_dir, 
                          transform=train_transform)
 
+num_train_data = len(train_data)
+
 train_dataloader = t.utils.data.DataLoader(train_data,
                                            batch_size=DC.train_batch_size,
                                            shuffle=True,
@@ -29,7 +31,7 @@ train_dataloader = t.utils.data.DataLoader(train_data,
 
 if DC.val:
     val_transform = T.Compose([
-#            T.Resize(224),
+            T.Resize(224),
 #            T.RandomResizedCrop(224),
             T.ToTensor()])
 
@@ -37,6 +39,8 @@ if DC.val:
 
     val_data = ImageFolder(val_dir,
                            transform=val_transform)
+
+    num_val_data = len(val_data)
 
     val_dataloader = t.utils.data.DataLoader(val_data,
                                              batch_size=DC.val_batch_size,
@@ -53,16 +57,22 @@ with open('classes.dat', 'w') as f:
 # model setting
 model = resnet101(pretrained=DC.pretrained)
 
-avgpool_kernel_size = 1 
+#avgpool_kernel_size = 1 
 num_ftrs = model.fc.in_features
 model.fc = t.nn.Linear(num_ftrs, 2)
-model.avgpool = t.nn.AvgPool2d(avgpool_kernel_size, stride=1, padding=0)
+#model.avgpool = t.nn.AvgPool2d(avgpool_kernel_size, stride=1, padding=0)
 
 if DC.use_gpu: model.cuda(DC.gpu_id)
 
-if DC.pretrained: model.load_state_dict(td.load(DC.load_model))
+train_imgs = 0
+iteration = 0
+if DC.load_model: 
+    model.load_state_dict(t.load(DC.load_model))
+    iteration = int(DC.load_model.split('.')[0].split('iter')[1])
 
-print(dir(model), '\n')
+    start_epoch = int(iteration*DC.train_batch_size/num_train_data)-1
+
+print(dir(model))
 for i in DC.__dict__.items():
     print(i)
 
@@ -74,9 +84,7 @@ scheduler = t.optim.lr_scheduler.StepLR(optimizer,
                                         step_size=DC.lr_decay_step, 
                                         gamma=0.1)
 
-train_imgs = 0
-iteration = 0
-for epoch in range(DC.max_epoch):
+for epoch in range(start_epoch, DC.max_epoch):
     model.train()
 #    print('model training: ', model.training)
     scheduler.step()
@@ -105,7 +113,7 @@ for epoch in range(DC.max_epoch):
         loss.backward()
         optimizer.step()
         lr = optimizer.param_groups[0]['lr']
-
+        
         elps_time = time.time() - time0
         if (iteration%DC.show_iter==0): 
             print('epoch:', epoch, 
@@ -123,7 +131,7 @@ for epoch in range(DC.max_epoch):
             os.remove('STOPCAR')
             sys.exit()
 
-        if (iteration%DC.save_iter==0) or os.path.isfile('SAVENOW'):
+        if (iteration%DC.save_iter==0):
             t.save(model.state_dict(), 'ResNet101-iter'+str(iteration)+'.pth')
 
         if os.path.isfile('SAVENOW'):
