@@ -123,8 +123,12 @@ for epoch in range(DC.max_epoch):
             os.remove('STOPCAR')
             sys.exit()
 
-        if (iteration%DC.save_iter==0):
+        if (iteration%DC.save_iter==0) or os.path.isfile('SAVENOW'):
             t.save(model.state_dict(), 'ResNet101-iter'+str(iteration)+'.pth')
+
+        if os.path.isfile('SAVENOW'):
+            t.save(model.state_dict(), 'ResNet101-iter'+str(iteration)+'.pth')
+            os.remove('SAVENOW')
 
         if DC.val and iteration%DC.val_iter==0:
             model.eval()
