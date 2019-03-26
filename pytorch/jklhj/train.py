@@ -62,7 +62,9 @@ if DC.use_gpu: model.cuda(DC.gpu_id)
 
 if DC.pretrained: model.load_state_dict(td.load(DC.load_model))
 
-print(dir(model))
+print(dir(model), '\n')
+for i in DC.__dict__.items():
+    print(i)
 
 criterion = t.nn.CrossEntropyLoss()
 
@@ -104,15 +106,17 @@ for epoch in range(DC.max_epoch):
         optimizer.step()
         lr = optimizer.param_groups[0]['lr']
 
+        elps_time = time.time() - time0
         if (iteration%DC.show_iter==0): 
-            print('epoch: ', epoch, 
-                  'iter: ', iteration, 
-                  'avg loss: {:.6f}'.format(float(avg_loss)),
-                  'lr: ', lr,
-                  'elpsed time/iter: {:.3f}'.format(time.time() - time0), 's',
-                  'elpsed timer: {:.3f}'.format((time.time() - 
-                                                 time0)*DC.show_iter), 's',
-                  'train images: ', train_imgs)
+            print('epoch:', epoch, 
+                  ' iter:', iteration, 
+                  ' avg loss: {:.6f}'.format(float(avg_loss)),
+                  ' lr:', lr,
+                  ' elpsed time/iter: {:.3f}'.format(elps_time), 's',
+                  ' elpsed time: {:.3f}'.format(elps_time*DC.show_iter), 's',
+                  ' train images:', train_imgs, ',',
+                  ' {:.1f}'.format((DC.show_iter*DC.train_batch_size) / 
+                                  (elps_time*DC.show_iter)), 'img/s')
 
         if os.path.isfile('STOPCAR'):
             t.save(model.state_dict(), 'ResNet101-iter'+str(iteration)+'.pth')
