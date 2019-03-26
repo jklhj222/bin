@@ -159,8 +159,17 @@ for epoch in range(start_epoch, DC.max_epoch):
                 avg_loss = (avg_loss * i * DC.val_batch_size + loss) \
                              / (DC.train_batch_size*(i+1))
 
+                prob = t.nn.functional.softmax(score)[:1].data.tolist()
+  
+                total_img += 1
+                if label.tolist()[0] == prob[0].index(max(prob[0])):
+                    correct_img += 1
+
+            accuracy = (correct_img/total_img)*100
+
             print('Validate now, ', 
                   'epoch: ', epoch+1,
                   'iter: ', iteration, 
+                  ' accuracy: {:.4f}', accuracy,
                   'avg loss: {:.12f}'.format(float(avg_loss)),
                   'train images: ', train_imgs)
