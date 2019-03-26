@@ -71,6 +71,7 @@ if DC.load_model:
     iteration = int(DC.load_model.split('.')[0].split('iter')[1])
 
     start_epoch = int(iteration*DC.train_batch_size/num_train_data)-1
+    train_imgs = iteration * DC.train_batch_size
 
 print(dir(model))
 for i in DC.__dict__.items():
