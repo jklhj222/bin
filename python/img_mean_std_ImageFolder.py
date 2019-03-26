@@ -5,21 +5,21 @@ import os
 import cv2
 import numpy as np
 
-path = '/home/hugh/Dropbox/tmp-PC/pytorch/train_all'
+def GetFileList(path):
+    root, dirs, files = next(os.walk(path))
 
-root, dirs, files = next(os.walk(path))
+    file_list = []
 
-file_list = []
+    for dirr in dirs:
+        content = os.listdir(os.path.join(root, dirr))
+        print(content)
+        file = [os.path.join(root, dirr, i) for i in content]
+        print(file)
+        file_list.extend(file)
 
-for dirr in dirs:
-    content = os.listdir(os.path.join(root, dirr))
-    print(content)
-    file = [os.path.join(root, dirr, i) for i in content]
-    print(file)
-    file_list.extend(file)
+    return file_list
 
-
-def compute_mean(file_list):
+def ComputeMean(file_list):
     
     per_image_Rmean = []
     per_image_Gmean = []
@@ -40,7 +40,7 @@ def compute_mean(file_list):
     return R_mean, G_mean, B_mean
 
 
-def compute_std(file_list, RGB_mean):
+def ComputeSTD(file_list, RGB_mean):
 
     B_mean = RGB_mean[2]
     G_mean = RGB_mean[1]
@@ -66,10 +66,14 @@ def compute_std(file_list, RGB_mean):
 
  
 if __name__ == '__main__':
-    R_mean, G_mean, B_mean = compute_mean(file_list)
+    path = '/home/hugh/Dropbox/tmp-PC/pytorch/train_all'
+
+    file_list = GetFileList(path)
+
+    R_mean, G_mean, B_mean = ComputeMean(file_list)
     print('RGB mean: ', R_mean, G_mean, B_mean)
 
-    R_std, G_std, B_std = compute_std(file_list, (R_mean, G_mean, B_mean))
+    R_std, G_std, B_std = ComputeSTD(file_list, (R_mean, G_mean, B_mean))
     print('RGB std: ', R_std, G_std, B_std)
 
 
