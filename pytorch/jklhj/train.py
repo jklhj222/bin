@@ -85,6 +85,9 @@ print(dir(model))
 for i in DC.__dict__.items():
     print(i)
 
+print('\n', 'Number of training data:', num_train_data)
+if DC.val: print('Number of val data:', num_val_data, '\n')
+
 criterion = t.nn.CrossEntropyLoss()
 
 #optimizer = t.optim.Adam(model.parameters(), lr=DC.base_lr) 
