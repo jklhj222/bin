@@ -11,7 +11,7 @@ import os, sys
 from config import DefaultConfig as DC
 
 train_transform = T.Compose([
-        T.Resize(512),
+        T.Resize(224),
 #        T.RandomResizedCrop(224),
         T.RandomHorizontalFlip(),
         T.RandomVerticalFlip(),
@@ -35,7 +35,7 @@ train_dataloader = t.utils.data.DataLoader(train_data,
 
 if DC.val:
     val_transform = T.Compose([
-            T.Resize(512),
+            T.Resize(224),
 #            T.RandomResizedCrop(224),
             T.ToTensor(),
             T.Normalize(mean=[0.503285495691, 0.451637785218, 0.467750980149],
@@ -64,10 +64,10 @@ with open('classes.dat', 'w') as f:
 # model setting
 model = resnet101(pretrained=DC.pretrained)
 
-avgpool_kernel_size = 16 
+#avgpool_kernel_size = 16 
 num_ftrs = model.fc.in_features
 model.fc = t.nn.Linear(num_ftrs, 2)
-model.avgpool = t.nn.AvgPool2d(avgpool_kernel_size, stride=1, padding=0)
+#model.avgpool = t.nn.AvgPool2d(avgpool_kernel_size, stride=1, padding=0)
 
 if DC.use_gpu: model.cuda(DC.train_gpu_id)
 
@@ -85,19 +85,22 @@ print(dir(model))
 for i in DC.__dict__.items():
     print(i)
 
-print('\n', 'Number of training data:', num_train_data)
+print()
+print('Number of training data:', num_train_data)
 if DC.val: print('Number of val data:', num_val_data, '\n')
 
 criterion = t.nn.CrossEntropyLoss()
 
-#optimizer = t.optim.Adam(model.parameters(), lr=DC.base_lr) 
-optimizer = t.optim.SGD(model.parameters(), lr=DC.base_lr, momentum=0.9) 
+optimizer = t.optim.Adam(model.parameters(), lr=DC.base_lr) 
+#optimizer = t.optim.SGD(model.parameters(), lr=DC.base_lr, momentum=0.9) 
 
 scheduler = t.optim.lr_scheduler.StepLR(optimizer, 
                                         step_size=DC.lr_decay_step, 
                                         gamma=0.1)
 
 time0 = time.time()
+score_list = []
+target_list = []
 for epoch in range(start_epoch, DC.max_epoch):
     model.train()
 #    print('model training: ', model.training)
@@ -127,16 +130,34 @@ for epoch in range(start_epoch, DC.max_epoch):
         optimizer.step()
         lr = optimizer.param_groups[0]['lr']
         
+        score_list.extend(score.tolist())
+        target_list.extend(target.tolist())
+
         if (iteration%DC.show_iter==0): 
+            # compute accuracy for showing process        
+            total_img = 0
+            correct_img = 0
+            for i, j in zip(score_list, target_list):
+                if i.index(max(i)) == j:
+                    correct_img += 1
+                total_img += 1
+
+            accuracy = (correct_img/total_img)*100
+
             elps_time = time.time() - time0
             time0 = time.time()
+            score_list = []
+            target_list = []
             print('epoch:', epoch, 
                   ' iter:', iteration, 
-                  ' avg loss: {:.8f}'.format(float(avg_loss)),
+                  ' avg loss: {:.6f}'.format(float(avg_loss)),
+                  ' acc:({}/{}) {:.2f}%'.format(correct_img, 
+                                                total_img, 
+                                                accuracy),
                   ' lr:', lr,
-                  ' elpsed time/iter: {:.3f}'.format(elps_time/DC.show_iter), 's',
-                  ' elpsed time: {:.3f}'.format(elps_time), 's',
-                  ' train images:', train_imgs, ',',
+                  ' time/iter: {:.2f}'.format(elps_time/DC.show_iter), 's/iter',
+                  ' time: {:.2f}'.format(elps_time), 's',
+                  ' images:', train_imgs, ',',
                   ' {:.1f}'.format((DC.show_iter*DC.train_batch_size) / 
                                   (elps_time)), 'img/s')
 
@@ -181,7 +202,6 @@ for epoch in range(start_epoch, DC.max_epoch):
                     if label.tolist()[0] == prob[0].index(max(prob[0])):
                         correct_img += 1
     
-                   
             accuracy = (correct_img/total_img)*100
 
             model.train()
