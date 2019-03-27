@@ -69,7 +69,7 @@ num_ftrs = model.fc.in_features
 model.fc = t.nn.Linear(num_ftrs, 2)
 model.avgpool = t.nn.AvgPool2d(avgpool_kernel_size, stride=1, padding=0)
 
-if DC.use_gpu: model.cuda(DC.gpu_id)
+if DC.use_gpu: model.cuda(DC.train_gpu_id)
 
 train_imgs = 0
 iteration = 0
@@ -87,12 +87,14 @@ for i in DC.__dict__.items():
 
 criterion = t.nn.CrossEntropyLoss()
 
+#optimizer = t.optim.Adam(model.parameters(), lr=DC.base_lr) 
 optimizer = t.optim.SGD(model.parameters(), lr=DC.base_lr, momentum=0.9) 
 
 scheduler = t.optim.lr_scheduler.StepLR(optimizer, 
                                         step_size=DC.lr_decay_step, 
                                         gamma=0.1)
 
+time0 = time.time()
 for epoch in range(start_epoch, DC.max_epoch):
     model.train()
 #    print('model training: ', model.training)
@@ -100,14 +102,13 @@ for epoch in range(start_epoch, DC.max_epoch):
 
     avg_loss = 0
     for i, (data, label) in enumerate(train_dataloader):
-        time0 = time.time()
         train_imgs += DC.train_batch_size
         iteration += 1
 
         if DC.use_gpu:
-            Input = Variable(data).cuda(DC.gpu_id)
-            target = Variable(label).cuda(DC.gpu_id)
-            score = model(Input).cuda(DC.gpu_id)
+            Input = Variable(data).cuda(DC.train_gpu_id)
+            target = Variable(label).cuda(DC.train_gpu_id)
+            score = model(Input).cuda(DC.train_gpu_id)
 
         else:
             Input = Variable(data)
@@ -123,17 +124,18 @@ for epoch in range(start_epoch, DC.max_epoch):
         optimizer.step()
         lr = optimizer.param_groups[0]['lr']
         
-        elps_time = time.time() - time0
         if (iteration%DC.show_iter==0): 
+            elps_time = time.time() - time0
+            time0 = time.time()
             print('epoch:', epoch, 
                   ' iter:', iteration, 
                   ' avg loss: {:.8f}'.format(float(avg_loss)),
                   ' lr:', lr,
-                  ' elpsed time/iter: {:.3f}'.format(elps_time), 's',
-                  ' elpsed time: {:.3f}'.format(elps_time*DC.show_iter), 's',
+                  ' elpsed time/iter: {:.3f}'.format(elps_time/DC.show_iter), 's',
+                  ' elpsed time: {:.3f}'.format(elps_time), 's',
                   ' train images:', train_imgs, ',',
                   ' {:.1f}'.format((DC.show_iter*DC.train_batch_size) / 
-                                  (elps_time*DC.show_iter)), 'img/s')
+                                  (elps_time)), 'img/s')
 
         if os.path.isfile('STOPCAR'):
             t.save(model.state_dict(), 'ResNet101-iter'+str(iteration)+'.pth')
@@ -153,12 +155,13 @@ for epoch in range(start_epoch, DC.max_epoch):
             total_img = 0
             correct_img = 0
 #            print('model.training: ', model.training)
+            time1 = time.time()
             for i, (data, label) in enumerate(val_dataloader):
                 with t.no_grad():
                     if DC.use_gpu:
-                        Input = Variable(data).cuda(DC.gpu_id)
-                        target = Variable(label).cuda(DC.gpu_id)
-                        score = model(Input).cuda(DC.gpu_id)
+                        Input = Variable(data).cuda(DC.train_gpu_id)
+                        target = Variable(label).cuda(DC.train_gpu_id)
+                        score = model(Input).cuda(DC.train_gpu_id)
     
                     else:
                         Input = Variable(data)
@@ -169,15 +172,17 @@ for epoch in range(start_epoch, DC.max_epoch):
                     avg_loss = (avg_loss*i*DC.val_batch_size + loss.item()) \
                                  / (DC.val_batch_size*(i+1))
     
-                    prob = t.nn.functional.softmax(score)[:1].data.tolist()
+                    prob = t.nn.functional.softmax(score, dim=1)[:1].data.tolist()
      
                     total_img += 1
                     if label.tolist()[0] == prob[0].index(max(prob[0])):
                         correct_img += 1
     
+                   
             accuracy = (correct_img/total_img)*100
 
             model.train()
+            val_elps_time = time.time() - time1
             print('Validate now, ', 
                   ' epoch:', epoch,
                   ' iter:', iteration, 
@@ -185,4 +190,4 @@ for epoch in range(start_epoch, DC.max_epoch):
                                                       total_img, 
                                                       accuracy),
                   'avg loss: {:.8f}'.format(float(avg_loss)),
-                  ' train images: ', train_imgs)
+                  ' elpsed time: {:.3f}'.format(val_elps_time))
