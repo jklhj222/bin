@@ -209,8 +209,8 @@ for epoch in range(start_epoch, DC.max_epoch):
             print('Validate now, ', 
                   ' epoch:', epoch,
                   ' iter:', iteration, 
+                  ' avg loss: {:.8f}'.format(float(avg_loss)),
                   ' accuracy:({}/{}) {:.4f}% '.format(correct_img, 
                                                       total_img, 
                                                       accuracy),
-                  'avg loss: {:.8f}'.format(float(avg_loss)),
-                  ' elpsed time: {:.3f}'.format(val_elps_time))
+                  ' time: {:.3f}'.format(val_elps_time))
