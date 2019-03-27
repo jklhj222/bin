@@ -11,11 +11,15 @@ import os, sys
 from config import DefaultConfig as DC
 
 train_transform = T.Compose([
-        T.Resize(224),
+        T.Resize(512),
 #        T.RandomResizedCrop(224),
         T.RandomHorizontalFlip(),
         T.RandomVerticalFlip(),
-        T.ToTensor()])
+        T.ToTensor(),
+        T.Normalize(mean=[0.503285495691, 0.451637785218, 0.467750980149],
+                    std=[0.151216848168, 0.139701434141, 0.153258293707])
+        ])
+        
 
 train_dir = DC.train_dir
 
@@ -31,9 +35,12 @@ train_dataloader = t.utils.data.DataLoader(train_data,
 
 if DC.val:
     val_transform = T.Compose([
-            T.Resize(224),
+            T.Resize(512),
 #            T.RandomResizedCrop(224),
-            T.ToTensor()])
+            T.ToTensor(),
+            T.Normalize(mean=[0.503285495691, 0.451637785218, 0.467750980149],
+                         std=[0.151216848168, 0.139701434141, 0.153258293707])
+            ])
 
     val_dir = DC.val_dir
 
@@ -57,15 +64,16 @@ with open('classes.dat', 'w') as f:
 # model setting
 model = resnet101(pretrained=DC.pretrained)
 
-#avgpool_kernel_size = 1 
+avgpool_kernel_size = 16 
 num_ftrs = model.fc.in_features
 model.fc = t.nn.Linear(num_ftrs, 2)
-#model.avgpool = t.nn.AvgPool2d(avgpool_kernel_size, stride=1, padding=0)
+model.avgpool = t.nn.AvgPool2d(avgpool_kernel_size, stride=1, padding=0)
 
 if DC.use_gpu: model.cuda(DC.gpu_id)
 
 train_imgs = 0
 iteration = 0
+start_epoch = 0
 if DC.load_model: 
     model.load_state_dict(t.load(DC.load_model))
     iteration = int(DC.load_model.split('.')[0].split('iter')[1])
@@ -108,7 +116,7 @@ for epoch in range(start_epoch, DC.max_epoch):
 
         optimizer.zero_grad()
         loss = criterion(score, target)
-        avg_loss = (avg_loss * i * DC.train_batch_size + loss) \
+        avg_loss = (avg_loss * i * DC.train_batch_size + loss.item()) \
                      / (DC.train_batch_size*(i+1))
 
         loss.backward()
@@ -119,7 +127,7 @@ for epoch in range(start_epoch, DC.max_epoch):
         if (iteration%DC.show_iter==0): 
             print('epoch:', epoch, 
                   ' iter:', iteration, 
-                  ' avg loss: {:.6f}'.format(float(avg_loss)),
+                  ' avg loss: {:.8f}'.format(float(avg_loss)),
                   ' lr:', lr,
                   ' elpsed time/iter: {:.3f}'.format(elps_time), 's',
                   ' elpsed time: {:.3f}'.format(elps_time*DC.show_iter), 's',
@@ -142,34 +150,39 @@ for epoch in range(start_epoch, DC.max_epoch):
         if DC.val and iteration%DC.val_iter==0:
             model.eval()
             avg_loss = 0
+            total_img = 0
+            correct_img = 0
 #            print('model.training: ', model.training)
             for i, (data, label) in enumerate(val_dataloader):
-           
-                if DC.use_gpu:
-                    Input = Variable(data).cuda(DC.gpu_id)
-                    target = Variable(label).cuda(DC.gpu_id)
-                    score = model(Input).cuda(DC.gpu_id)
-
-                else:
-                    Input = Variable(data)
-                    target = Variable(label)
-                    score = model(Input)
-
-                loss = criterion(score, target) 
-                avg_loss = (avg_loss * i * DC.val_batch_size + loss) \
-                             / (DC.train_batch_size*(i+1))
-
-                prob = t.nn.functional.softmax(score)[:1].data.tolist()
-  
-                total_img += 1
-                if label.tolist()[0] == prob[0].index(max(prob[0])):
-                    correct_img += 1
-
+                with t.no_grad():
+                    if DC.use_gpu:
+                        Input = Variable(data).cuda(DC.gpu_id)
+                        target = Variable(label).cuda(DC.gpu_id)
+                        score = model(Input).cuda(DC.gpu_id)
+    
+                    else:
+                        Input = Variable(data)
+                        target = Variable(label)
+                        score = model(Input)
+    
+                    loss = criterion(score, target) 
+                    avg_loss = (avg_loss*i*DC.val_batch_size + loss.item()) \
+                                 / (DC.val_batch_size*(i+1))
+    
+                    prob = t.nn.functional.softmax(score)[:1].data.tolist()
+     
+                    total_img += 1
+                    if label.tolist()[0] == prob[0].index(max(prob[0])):
+                        correct_img += 1
+    
             accuracy = (correct_img/total_img)*100
 
+            model.train()
             print('Validate now, ', 
                   'epoch: ', epoch+1,
                   'iter: ', iteration, 
-                  ' accuracy: {:.4f}', accuracy,
-                  'avg loss: {:.12f}'.format(float(avg_loss)),
+                  ' accuracy:({}/{}) {:.4f}% '.format(correct_img, 
+                                                      total_img, 
+                                                      accuracy),
+                  'avg loss: {:.8f}'.format(float(avg_loss)),
                   'train images: ', train_imgs)
