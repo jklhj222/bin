@@ -179,7 +179,7 @@ for epoch in range(start_epoch, DC.max_epoch):
 
             model.train()
             print('Validate now, ', 
-                  'epoch: ', epoch+1,
+                  'epoch: ', epoch,
                   'iter: ', iteration, 
                   ' accuracy:({}/{}) {:.4f}% '.format(correct_img, 
                                                       total_img, 
