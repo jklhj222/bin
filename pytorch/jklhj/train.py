@@ -3,7 +3,7 @@
 import torch as t
 from torchvision import transforms as T
 from torchvision.datasets import ImageFolder
-from torchvision.models import resnet101
+from torchvision.models import resnet152
 from torch.autograd import Variable
 import time
 import os, sys
@@ -11,7 +11,7 @@ import os, sys
 from config import DefaultConfig as DC
 
 train_transform = T.Compose([
-        T.Resize(224),
+        T.Resize(DC.input_size),
 #        T.RandomResizedCrop(224),
         T.RandomHorizontalFlip(),
         T.RandomVerticalFlip(),
@@ -35,7 +35,7 @@ train_dataloader = t.utils.data.DataLoader(train_data,
 
 if DC.val:
     val_transform = T.Compose([
-            T.Resize(224),
+            T.Resize(DC.input_size),
 #            T.RandomResizedCrop(224),
             T.ToTensor(),
             T.Normalize(mean=[0.503285495691, 0.451637785218, 0.467750980149],
@@ -62,7 +62,7 @@ with open('classes.dat', 'w') as f:
         f.write(str(i) + ' : ' + str(clas) + '\n')
 
 # model setting
-model = resnet101(pretrained=DC.pretrained)
+model = resnet152(pretrained=DC.pretrained)
 
 #avgpool_kernel_size = 16 
 num_ftrs = model.fc.in_features
@@ -166,7 +166,7 @@ for epoch in range(start_epoch, DC.max_epoch):
             os.remove('STOPCAR')
             sys.exit()
 
-        if (iteration%DC.save_iter==0):
+        if (iteration%DC.save_iter==0) or (epoch == DC.max_epoch):
             t.save(model.state_dict(), 'ResNet101-iter'+str(iteration)+'.pth')
 
         if os.path.isfile('SAVENOW'):

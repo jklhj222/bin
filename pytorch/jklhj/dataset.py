@@ -16,7 +16,10 @@ class TestDataset(data.Dataset):
 
         self.transforms = T.Compose([
                  T.Resize((resize, resize)),
-                 T.ToTensor()])
+                 T.ToTensor(),
+#                 T.Normalize(mean=[0.503285495691, 0.451637785218, 0.467750980149],
+#                              std=[0.151216848168, 0.139701434141, 0.153258293707])
+                 ])
         
     def __getitem__(self, index):
         img_path = self.imgs[index]
