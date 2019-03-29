@@ -1,12 +1,16 @@
 #!/urs/bin/env python3
+from torchvision import transforms as T
 
 class DefaultConfig():
     
-    use_gpu = True
+    use_gpu = True 
     num_workers = 2
 
     input_size = 224
 
+    normalize = T.Normalize(mean=[0.503285495691, 0.451637785218, 0.467750980149],
+                             std=[0.151216848168, 0.139701434141, 0.153258293707])
+    
     # for training setting
     train_gpu_id = 1
     pretrained = False
@@ -17,16 +21,16 @@ class DefaultConfig():
     base_lr = 0.001
     lr_decay_step = 120
     max_epoch = 300
-    show_iter = 50 
+    show_iter = 5 
     save_iter = 5000
 
     # for validation setting
     val = True
-    val_gpu_id = 1
+    val_gpu_id = 0
     val_dir   = '/home/hugh/Dropbox/tmp-PC/pytorch/val_data'
 #    val_dir   = '/mnt/sdc1/work/kaggle/Aerial_Cactus_Identification/val_data'
     val_model = 'ResNet101-iter55000.pth'
-    val_iter = 500
+    val_iter = 5
     val_batch_size = 1
 
     # for testing setting

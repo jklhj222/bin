@@ -9,6 +9,7 @@ import time
 import os, sys
 
 from config import DefaultConfig as DC
+import val
 
 train_transform = T.Compose([
         T.Resize(DC.input_size),
@@ -16,8 +17,7 @@ train_transform = T.Compose([
         T.RandomHorizontalFlip(),
         T.RandomVerticalFlip(),
         T.ToTensor(),
-        T.Normalize(mean=[0.503285495691, 0.451637785218, 0.467750980149],
-                    std=[0.151216848168, 0.139701434141, 0.153258293707])
+        DC.normalize,
         ])
         
 
@@ -38,16 +38,13 @@ if DC.val:
             T.Resize(DC.input_size),
 #            T.RandomResizedCrop(224),
             T.ToTensor(),
-            T.Normalize(mean=[0.503285495691, 0.451637785218, 0.467750980149],
-                         std=[0.151216848168, 0.139701434141, 0.153258293707])
+            DC.normalize,
             ])
 
     val_dir = DC.val_dir
 
     val_data = ImageFolder(val_dir,
                            transform=val_transform)
-
-    num_val_data = len(val_data)
 
     val_dataloader = t.utils.data.DataLoader(val_data,
                                              batch_size=DC.val_batch_size,
@@ -78,7 +75,7 @@ if DC.load_model:
     model.load_state_dict(t.load(DC.load_model))
     iteration = int(DC.load_model.split('.')[0].split('iter')[1])
 
-    start_epoch = int(iteration*DC.train_batch_size/num_train_data)
+    start_epoch = int(iteration*DC.train_batch_size/num_train_data)-1
     train_imgs = iteration * DC.train_batch_size
 
 print(dir(model))
@@ -87,7 +84,7 @@ for i in DC.__dict__.items():
 
 print()
 print('Number of training data:', num_train_data)
-if DC.val: print('Number of val data:', num_val_data, '\n')
+if DC.val: print('Number of val data:', len(val_data), '\n')
 
 criterion = t.nn.CrossEntropyLoss()
 
@@ -151,7 +148,7 @@ for epoch in range(start_epoch, DC.max_epoch):
             print('epoch:', epoch, 
                   ' iter:', iteration, 
                   ' avg loss: {:.6f}'.format(float(avg_loss)),
-                  ' acc:({}/{}) {:.2f} %'.format(correct_img, 
+                  ' acc:({}/{}) {:.2f}%'.format(correct_img, 
                                                 total_img, 
                                                 accuracy),
                   ' lr:', lr,
@@ -174,43 +171,20 @@ for epoch in range(start_epoch, DC.max_epoch):
             os.remove('SAVENOW')
 
         if DC.val and iteration%DC.val_iter==0:
-            model.eval()
-            avg_loss = 0
-            total_img = 0
-            correct_img = 0
 #            print('model.training: ', model.training)
             time1 = time.time()
-            for i, (data, label) in enumerate(val_dataloader):
-                with t.no_grad():
-                    if DC.use_gpu:
-                        Input = Variable(data).cuda(DC.train_gpu_id)
-                        target = Variable(label).cuda(DC.train_gpu_id)
-                        score = model(Input).cuda(DC.train_gpu_id)
-    
-                    else:
-                        Input = Variable(data)
-                        target = Variable(label)
-                        score = model(Input)
-    
-                    loss = criterion(score, target) 
-                    avg_loss = (avg_loss*i*DC.val_batch_size + loss.item()) \
-                                 / (DC.val_batch_size*(i+1))
-    
-                    prob = t.nn.functional.softmax(score, dim=1)[:1].data.tolist()
-     
-                    total_img += 1
-                    if label.tolist()[0] == prob[0].index(max(prob[0])):
-                        correct_img += 1
-    
-            accuracy = (correct_img/total_img)*100
+
+            val_out = val.val(True, model, val_transform, val_data, val_dataloader)
 
             model.train()
+
             val_elps_time = time.time() - time1
+
             print('Validate now, ', 
                   ' epoch:', epoch,
                   ' iter:', iteration, 
-                  ' avg loss: {:.8f}'.format(float(avg_loss)),
-                  ' accuracy:({}/{}) {:.4f} % '.format(correct_img, 
-                                                      total_img, 
-                                                      accuracy),
+                  ' avg loss: {:.8f}'.format(val_out[0]),
+                  ' accuracy:({}/{}) {:.4f}% '.format(val_out[1], 
+                                                      val_out[2], 
+                                                      val_out[3]),
                   ' time: {:.3f}'.format(val_elps_time))
