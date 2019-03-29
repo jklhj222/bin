@@ -33,7 +33,7 @@ train_dataloader = t.utils.data.DataLoader(train_data,
                                            shuffle=True,
                                            num_workers=DC.num_workers)
 
-if DC.val:
+if DC.val_in_train:
     val_transform = T.Compose([
             T.Resize(DC.input_size),
 #            T.RandomResizedCrop(224),
@@ -84,7 +84,7 @@ for i in DC.__dict__.items():
 
 print()
 print('Number of training data:', num_train_data)
-if DC.val: print('Number of val data:', len(val_data), '\n')
+if DC.val_in_train: print('Number of val data:', len(val_data), '\n')
 
 criterion = t.nn.CrossEntropyLoss()
 
@@ -170,7 +170,7 @@ for epoch in range(start_epoch, DC.max_epoch):
             t.save(model.state_dict(), 'ResNet101-iter'+str(iteration)+'.pth')
             os.remove('SAVENOW')
 
-        if DC.val and iteration%DC.val_iter==0:
+        if DC.val_in_train and iteration%DC.val_iter==0:
 #            print('model.training: ', model.training)
             time1 = time.time()
 
