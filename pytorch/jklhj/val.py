@@ -32,7 +32,7 @@ num_ftrs = model.fc.in_features
 model.fc = t.nn.Linear(num_ftrs, 2)
 #model.avgpool = t.nn.AvgPool2d(avgpool_kernel_size, stride=1, padding=0)
 
-if DC.use_gpu: model.cuda(DC.train_gpu_id)
+if DC.use_gpu: model.cuda(DC.val_gpu_id)
 
 model.load_state_dict(t.load(DC.val_model))
 
