@@ -1,8 +1,7 @@
-import torch as t
-from torchvision import transforms as T
-from torchvision.datasets import ImageFolder
+#!/usr/bin/env python3
+
 from torch.autograd import Variable
-from torchvision.models import resnet152
+import torch as t
 from config import DefaultConfig as DC
 
 def val(in_train, model, transform, val_data, dataloader):
@@ -13,17 +12,17 @@ def val(in_train, model, transform, val_data, dataloader):
     num_val_data = len(val_data)
     
     val_dataloader = dataloader
-    
-    #avgpool_kernel_size = 16
-    num_ftrs = model.fc.in_features
-    model.fc = t.nn.Linear(num_ftrs, 2)
-    #model.avgpool = t.nn.AvgPool2d(avgpool_kernel_size, stride=1, padding=0)
-    
-    if DC.use_gpu and not in_train: 
-        model.cuda(DC.val_gpu_id)
 
-    elif DC.use_gpu and in_train:
-        model.cuda(DC.train_gpu_id)    
+    # resetting the model 
+    if not in_train:    
+        avgpool_kernel_size = 16
+        num_ftrs = model.fc.in_features
+        model.fc = t.nn.Linear(num_ftrs, 2)
+        model.avgpool = t.nn.AvgPool2d(avgpool_kernel_size, stride=1, padding=0)
+    
+    if DC.use_gpu:
+        if not in_train: 
+            model.to('cuda:' + str(DC.val_gpu_id))
 
     if not in_train: model.load_state_dict(t.load(DC.val_model))
     
@@ -79,6 +78,10 @@ def val(in_train, model, transform, val_data, dataloader):
     return (avg_loss, correct_img, total_img, accuracy)
 
 if __name__ == '__main__':
+    from torchvision.models import resnet152
+    from torchvision import transforms as T
+    from torchvision.datasets import ImageFolder
+
     model = resnet152(pretrained=False)
    
     val_transform = T.Compose([

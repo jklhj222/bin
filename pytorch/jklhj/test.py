@@ -26,7 +26,7 @@ if DC.use_gpu: model.cuda(DC.test_gpu_id)
 
 model.load_state_dict(t.load(test_model))
 
-test_data = TestDataset(test_dir, resize=input_size)
+test_data = TestDataset(test_dir, resize=input_size, normalize=DC.normalize)
 
 test_dataloader = t.utils.data.DataLoader(test_data,
                                           batch_size=1,

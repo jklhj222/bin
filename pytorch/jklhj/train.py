@@ -38,7 +38,7 @@ if DC.val:
             T.Resize(DC.input_size),
 #            T.RandomResizedCrop(224),
             T.ToTensor(),
-            DC.normalize,
+            DC.normalize
             ])
 
     val_dir = DC.val_dir
@@ -61,10 +61,10 @@ with open('classes.dat', 'w') as f:
 # model setting
 model = resnet152(pretrained=DC.pretrained)
 
-#avgpool_kernel_size = 16 
+avgpool_kernel_size = 16 
 num_ftrs = model.fc.in_features
 model.fc = t.nn.Linear(num_ftrs, 2)
-#model.avgpool = t.nn.AvgPool2d(avgpool_kernel_size, stride=1, padding=0)
+model.avgpool = t.nn.AvgPool2d(avgpool_kernel_size, stride=1, padding=0)
 
 if DC.use_gpu: model.cuda(DC.train_gpu_id)
 
