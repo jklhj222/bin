@@ -5,7 +5,7 @@ from torchvision import transforms as T
 from torchvision.datasets import ImageFolder
 from torchvision.models import resnet152
 from torch.autograd import Variable
-import time
+import time, datetime
 import os, sys
 
 from config import DefaultConfig as DC
@@ -102,6 +102,9 @@ time0 = time.time()
 score_list = []
 target_list = []
 for epoch in range(start_epoch, DC.max_epoch):
+    print('Epoch:', epoch+1, 
+          datetime.datetime.now().strftime("[ %Y-%m-%d %H:%M:%S ]"))
+
     model.train()
 #    print('model training: ', model.training)
     scheduler.step()
@@ -148,8 +151,7 @@ for epoch in range(start_epoch, DC.max_epoch):
             time0 = time.time()
             score_list = []
             target_list = []
-            print('epoch:', epoch, 
-                  ' iter:', iteration, 
+            print('iter:', iteration, 
                   ' avg loss: {:.6f}'.format(float(avg_loss)),
                   ' acc:({}/{}) {:.2f}%'.format(correct_img, 
                                                 total_img, 
