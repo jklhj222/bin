@@ -3,7 +3,7 @@
 import os
 import torch as t
 from torch.autograd import Variable
-from torchvision.models import resnet101
+from torchvision.models import resnet152
 from dataset import TestDataset
 from config import DefaultConfig as DC
 
@@ -13,8 +13,9 @@ test_model = DC.test_model
 input_size = DC.input_size
 num_workers = DC.num_workers
 title_output = DC.title_output
+normalize = DC.normalize
 
-model = resnet101()
+model = resnet152()
 model.eval()
 
 avgpool_kernel_size = 16
@@ -23,10 +24,13 @@ model.fc = t.nn.Linear(num_ftrs, 2)
 model.avgpool = t.nn.AvgPool2d(avgpool_kernel_size, stride=1, padding=0)
 
 if DC.use_gpu: model.cuda(DC.test_gpu_id)
+#if DC.use_gpu: model.to('cuda:' + str(DC.test_gpu_id))
 
-model.load_state_dict(t.load(test_model))
+model.load_state_dict(t.load(test_model, 
+                             map_location=lambda storage, 
+                             loc: storage.cuda(DC.test_gpu_id)))
 
-test_data = TestDataset(test_dir, resize=input_size, normalize=DC.normalize)
+test_data = TestDataset(test_dir, resize=input_size, normalize=normalize)
 
 test_dataloader = t.utils.data.DataLoader(test_data,
                                           batch_size=1,

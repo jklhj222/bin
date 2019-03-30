@@ -22,20 +22,21 @@ class DefaultConfig():
     lr_decay_step = 120
     max_epoch = 300
     show_iter = 50 
-    save_iter = 5000
+    save_iter = 10000
 
     # for validation setting
     val_in_train = True
     val_gpu_id = 0
-    val_dir   = '/home/hugh/Dropbox/tmp-PC/pytorch/val_data'
-#    val_dir   = '/mnt/sdc1/work/kaggle/Aerial_Cactus_Identification/val_data'
-    val_model = ''
+#    val_dir   = '/home/hugh/Dropbox/tmp-PC/pytorch/val_data'
+    val_dir   = '/mnt/sdc1/work/kaggle/Aerial_Cactus_Identification/val_data'
+    val_model = 'ResNet152-iter150000.pth'
     val_iter = 500
     val_batch_size = 1
 
     # for testing setting
     test_gpu_id = 0
-    test_model = 'ResNet101-iter1189.pth'
-    test_dir  = '/home/hugh/Dropbox/tmp-PC/pytorch/test'
+    test_model = 'ResNet152-iter150000.pth'
+#    test_dir  = '/home/hugh/Dropbox/tmp-PC/pytorch/test'
+    test_dir  = '/home/jklhj/Dropbox/tmp-PC/pytorch/test'
     title_output = 'id,has_cactus'
 

@@ -24,7 +24,10 @@ def val(in_train, model, transform, val_data, dataloader):
         if not in_train: 
             model.to('cuda:' + str(DC.val_gpu_id))
 
-    if not in_train: model.load_state_dict(t.load(DC.val_model))
+    if not in_train: model.load_state_dict(
+                       t.load(DC.val_model,
+                              map_location=lambda storage,
+                              loc: storage.cuda(DC.val_gpu_id)))
     
     criterion = t.nn.CrossEntropyLoss()
     
@@ -50,7 +53,10 @@ def val(in_train, model, transform, val_data, dataloader):
                 Input = Variable(data)
                 target = Variable(label)
                 score = model(Input)
-    
+   
+            testimg = val_data.imgs
+#            print(testimg, type(testimg))
+ 
             loss = criterion(score, target)
             avg_loss = (avg_loss*i*DC.val_batch_size + loss.item()) \
                          / (DC.val_batch_size*(i+1))

@@ -72,7 +72,10 @@ train_imgs = 0
 iteration = 0
 start_epoch = 0
 if DC.load_model: 
-    model.load_state_dict(t.load(DC.load_model))
+    model.load_state_dict(t.load(DC.load_model,
+                                 map_location=lambda storage,
+                                 loc: storage.cuda(DC.test_gpu_id)))
+
     iteration = int(DC.load_model.split('.')[0].split('iter')[1])
 
     start_epoch = int(iteration*DC.train_batch_size/num_train_data)-1
@@ -159,15 +162,15 @@ for epoch in range(start_epoch, DC.max_epoch):
                                   (elps_time)), 'img/s')
 
         if os.path.isfile('STOPCAR'):
-            t.save(model.state_dict(), 'ResNet101-iter'+str(iteration)+'.pth')
+            t.save(model.state_dict(), 'ResNet152-iter'+str(iteration)+'.pth')
             os.remove('STOPCAR')
             sys.exit()
 
         if (iteration%DC.save_iter==0) or (epoch == DC.max_epoch):
-            t.save(model.state_dict(), 'ResNet101-iter'+str(iteration)+'.pth')
+            t.save(model.state_dict(), 'ResNet152-iter'+str(iteration)+'.pth')
 
         if os.path.isfile('SAVENOW'):
-            t.save(model.state_dict(), 'ResNet101-iter'+str(iteration)+'.pth')
+            t.save(model.state_dict(), 'ResNet152-iter'+str(iteration)+'.pth')
             os.remove('SAVENOW')
 
         if DC.val_in_train and iteration%DC.val_iter==0:
