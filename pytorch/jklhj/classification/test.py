@@ -56,7 +56,7 @@ for i, (data, img_path) in enumerate(test_dataloader):
         print('score: ', score)
 
         prob = t.nn.functional.softmax(score, dim=1)[:1].data.tolist()
-        print('prob: ', prob, len(prob), '\n')
+        print('prob: ', prob, prob[0].index(max(prob[0])), '\n')
 
         with open('test_predict.txt', 'a') as f:
             f.write( filename + ',' + str(prob[0].index(max(prob[0]))) + '\n')
