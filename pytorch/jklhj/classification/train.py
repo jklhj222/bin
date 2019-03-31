@@ -152,7 +152,7 @@ for epoch in range(start_epoch, DC.max_epoch):
             score_list = []
             target_list = []
             print('iter:', iteration, 
-                  ' avg loss: {:.6f}'.format(float(avg_loss)),
+                  ' avg loss: {:.8f}'.format(float(avg_loss)),
                   ' acc:({}/{}) {:.2f}%'.format(correct_img, 
                                                 total_img, 
                                                 accuracy),
