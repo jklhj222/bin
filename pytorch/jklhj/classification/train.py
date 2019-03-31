@@ -186,7 +186,7 @@ for epoch in range(start_epoch, DC.max_epoch):
             val_elps_time = time.time() - time1
 
             print('Validate now, ', 
-                  ' epoch:', epoch,
+                  ' epoch:', epoch+1,
                   ' iter:', iteration, 
                   ' avg loss: {:.8f}'.format(val_out[0]),
                   ' accuracy:({}/{}) {:.4f}% '.format(val_out[1], 
