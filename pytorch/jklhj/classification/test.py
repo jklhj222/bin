@@ -30,7 +30,7 @@ model.load_state_dict(t.load(test_model,
                              map_location=lambda storage, 
                              loc: storage.cuda(DC.test_gpu_id)))
 
-test_data = TestDataset(test_dir, resize=input_size, normalize=normalize)
+test_data = TestDataset(test_dir, normalize=normalize, resize=input_size)
 
 test_dataloader = t.utils.data.DataLoader(test_data,
                                           batch_size=1,

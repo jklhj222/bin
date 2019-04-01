@@ -6,7 +6,7 @@ import os
 # for the testing images all in a directory,
 # returns image data and file name.
 class TestDataset(data.Dataset):
-    def __init__(self, data_path, resize=224, normalize):
+    def __init__(self, data_path, normalize, resize=224):
 
         imgs = [os.path.join(data_path, img) for img in os.listdir(data_path)]
 
