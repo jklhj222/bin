@@ -16,6 +16,7 @@ train_transform = T.Compose([
 #        T.RandomResizedCrop(224),
         T.RandomHorizontalFlip(),
         T.RandomVerticalFlip(),
+        T.transforms.RandomRotation([-90, 90]),
         T.ToTensor(),
         DC.normalize,
         ])
