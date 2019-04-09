@@ -1,6 +1,6 @@
 #!/bin/bash
-# need "$lang"."$fontname"."num"."$image_format" file to be existed. (can't be too small)
-# need "$lang"."$fontname"."num".box file to be existed. (be created from jTessBoxEditor)
+# need "$lang"."$fontname".exp"num"."$image_format" file to be existed. (can't be too small)
+# need "$lang"."$fontname".exp"num".box file to be existed. (be created from jTessBoxEditor)
 
 # java -jar jTessBoxEditor.jar  :  open jTessBoxEditor
 # Box Editor --> Open --> choose the training image
