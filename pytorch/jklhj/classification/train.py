@@ -169,7 +169,7 @@ for epoch in range(start_epoch, DC.max_epoch):
             os.remove('STOPCAR')
             sys.exit()
 
-        if (iteration%DC.save_iter==0) or (epoch == DC.max_epoch):
+        if (iteration%DC.save_iter==0):
             t.save(model.state_dict(), 'ResNet152-iter'+str(iteration)+'.pth')
 
         if os.path.isfile('SAVENOW'):
@@ -194,3 +194,6 @@ for epoch in range(start_epoch, DC.max_epoch):
                                                       val_out[2], 
                                                       val_out[3]),
                   ' time: {:.3f}'.format(val_elps_time))
+
+    if (epoch+1 == DC.max_epoch):
+        t.save(model.state_dict(), 'ResNet152-iter'+str(iteration)+'.pth')
