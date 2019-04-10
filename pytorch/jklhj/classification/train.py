@@ -13,6 +13,7 @@ import val
 
 train_transform = T.Compose([
         T.Resize(DC.input_size),
+        T.Grayscale(),
 #        T.RandomResizedCrop(224),
         T.RandomHorizontalFlip(),
         T.RandomVerticalFlip(),
@@ -62,6 +63,8 @@ with open('classes.dat', 'w') as f:
 # model setting
 model = resnet152(pretrained=DC.pretrained)
 
+#model.conv1 = t.nn.Conv2d(1, 64, kernel_size=7, stride=2, padding=3, 
+#                               bias=False)
 avgpool_kernel_size = 16 
 num_ftrs = model.fc.in_features
 model.fc = t.nn.Linear(num_ftrs, 2)
