@@ -13,9 +13,11 @@ import val
 
 train_transform = T.Compose([
         T.Resize(DC.input_size),
+        T.Grayscale(),
 #        T.RandomResizedCrop(224),
         T.RandomHorizontalFlip(),
         T.RandomVerticalFlip(),
+        T.transforms.RandomRotation([-90, 90]),
         T.ToTensor(),
         DC.normalize,
         ])
@@ -61,6 +63,8 @@ with open('classes.dat', 'w') as f:
 # model setting
 model = resnet152(pretrained=DC.pretrained)
 
+#model.conv1 = t.nn.Conv2d(1, 64, kernel_size=7, stride=2, padding=3, 
+#                               bias=False)
 avgpool_kernel_size = 16 
 num_ftrs = model.fc.in_features
 model.fc = t.nn.Linear(num_ftrs, 2)
@@ -168,7 +172,7 @@ for epoch in range(start_epoch, DC.max_epoch):
             os.remove('STOPCAR')
             sys.exit()
 
-        if (iteration%DC.save_iter==0) or (epoch == DC.max_epoch):
+        if (iteration%DC.save_iter==0):
             t.save(model.state_dict(), 'ResNet152-iter'+str(iteration)+'.pth')
 
         if os.path.isfile('SAVENOW'):
@@ -193,3 +197,6 @@ for epoch in range(start_epoch, DC.max_epoch):
                                                       val_out[2], 
                                                       val_out[3]),
                   ' time: {:.3f}'.format(val_elps_time))
+
+    if (epoch+1 == DC.max_epoch):
+        t.save(model.state_dict(), 'ResNet152-iter'+str(iteration)+'.pth')
