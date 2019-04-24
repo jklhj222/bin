@@ -10,7 +10,8 @@ parser = argparse.ArgumentParser()
 parser.add_argument('--img_dir', default=None)
 parser.add_argument('--out_file', default='test.png')
 parser.add_argument('--dis', default=None)
-parser.add_argument('--fig_size', default=(100, 100))
+parser.add_argument('--fig_size', default=100, help='default:100')
+parser.add_argument('--subfig_size', default=200, help='default:100')
 parser.add_argument('--show', default=False,
                               action='store_true')
 
@@ -18,14 +19,18 @@ args = parser.parse_args()
 
 img_dir = args.img_dir
 dis = args.dis
+fig_size = (int(args.fig_size), int(args.fig_size))
+subfig_size = (int(args.subfig_size), int(args.subfig_size))
 
 files = glob.glob(img_dir + '/*.jpg')
 
 ncols = int(math.sqrt(len(files)))
 nrows = math.ceil(len(files) / ncols)
 print('ncols:', ncols, 'nrows:', nrows)
+print('fig_size:', fig_size)
+print('subfig_size:', subfig_size)
 
-fig = plt.figure(figsize=args.fig_size)
+fig = plt.figure(figsize=fig_size)
 fig.tight_layout()
 plt.subplots_adjust(wspace=0, hspace=0)
 
@@ -47,7 +52,7 @@ for row in range(nrows):
        
         grid = '(' + str(col) + ',' + str(row) + ')'
 
-        img = Image.new('RGB', (200, 200), color = (255, 255, 255))
+        img = Image.new('RGB', subfig_size, color = (255, 255, 255))
         font_type = 'NotoSansCJK-Medium.ttc'
         font_out = ImageFont.truetype(font_type, 10, encoding='utf-8') 
         font_grid = ImageFont.truetype(font_type, 15, encoding='utf-8') 
