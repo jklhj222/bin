@@ -1,0 +1,6 @@
+classes=1
+train  = /home/hugh/tmp/darknet_py/demo/data/train.txt
+valid  = /home/hugh/tmp/darknet_py/demo/data/train.txt
+names = /home/hugh/tmp/darknet_py/demo/data/adat.names
+backup = /home/hugh/tmp/darknet_py/demo/backup/
+
