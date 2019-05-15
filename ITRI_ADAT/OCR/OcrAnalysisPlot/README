@@ -1,0 +1,18 @@
+1. python3 split_pic.py
+   The picture will be splited into small pieces in directory "split" .
+
+2. bash tesseract_test.sh
+   The small pictures will be sent to tesseract to do the analyse, and save the result into
+   *_output.txt files  in directory "split" .
+
+3. python3 OCR_score.py --img_dirs "['split']" --test_string "0123456789012345678901234567890"
+   To calculate the score of each grid of the original picture. The results will be saved in 
+   *_output_Score.txt (original_score,norm_score) in directory "split" .  And the scores of all
+   grids will be saved to all_scores.txt, the file can be plot the contour picture by gnuplot.
+
+4. python3 OCR_test_plot.py --img_dir split
+   To visualize the result and the score of each grid. The result will be saved in test.png 
+   (the output file name can be change by --out_file option).
+
+5. gnuplot gnuplot-script.pm3d.plt
+   To visualize the result by gnuplot contour plot.
