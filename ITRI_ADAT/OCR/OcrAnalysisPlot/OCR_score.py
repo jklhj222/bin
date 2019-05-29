@@ -12,12 +12,18 @@ parser.add_argument('--img_dirs',
                     help='ex.: ["dis10", "dis20", "dis30"]')
 parser.add_argument('--test_string', default=None, help='ex.: "0123456789"')
 parser.add_argument('--sub_min', default=2, help='default: 2')
+parser.add_argument('--perfect_score_min', default=5, help='default: 5')
+parser.add_argument('--score_type', 
+                    default='length_exp', 
+                    help='"length_exp" or "length",  default: "length_exp"')
 
 args = parser.parse_args()
 
 img_dirs = eval(args.img_dirs)
 test_string = args.test_string
 sub_min = int(args.sub_min)
+perfect_score_min = int(args.perfect_score_min)
+score_type = args.score_type
 
 def sub_strings(test_string, sub_min):
     strings = []
@@ -45,7 +51,10 @@ def perfect_score(string_len):
     for i in range(string_len-1):
 #        print('line_len:', len(string))
 #        print('i: ', i, score)
-        score += math.exp(string_len-i) * (i+1)
+        if score_type == 'length_exp':
+            score += math.exp(string_len-i) * (i+1)
+        elif score_type == 'length':
+            score += (string_len-i) * (i+1)
 
     return score
 
@@ -56,7 +65,10 @@ def calc_line_score(line, test_strings):
     score = 0.0 
     for string in test_strings:
         if string in test_line:
-            score += exp(len(string))
+            if score_type == 'length_exp':
+                score += exp(len(string))
+            elif score_type == 'length':
+                score += len(string)
 
     return score
 
@@ -70,7 +82,7 @@ def calc_grid_score(file_path, test_strings):
         score = 0.0
         for line in lines:
              line_score = calc_line_score(line, test_strings)
-#             print(line_score)
+             print(line_score)
              score += line_score
 
     return score
@@ -117,7 +129,11 @@ for img_dir in img_dirs:
             file_path = os.path.join(img_dir, file_name)
             files.append(file_path)           
  
-            num_lines, num_chars = grid_effective_LineChar(file_path, strings, perfect_score(8))
+            num_lines, num_chars = grid_effective_LineChar(
+                                     file_path, 
+                                     strings, 
+                                     perfect_score(perfect_score_min) )
+
             max_lines = max(num_lines, max_lines)
             max_chars = max(num_chars, max_chars)
 
@@ -139,7 +155,10 @@ for img_dir in img_dirs:
             
             file_path = os.path.join(img_dir, file_name)
 
-            eff_lines, eff_chars = grid_effective_LineChar(file_path, strings, perfect_score(8))
+            eff_lines, eff_chars = grid_effective_LineChar(
+                                     file_path, 
+                                     strings, 
+                                     perfect_score(perfect_score_min) )
 #            print(file_path)
 #            print(eff_lines, eff_chars)
 

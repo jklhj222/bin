@@ -5,6 +5,9 @@
 # java -jar jTessBoxEditor.jar  :  open jTessBoxEditor
 # Box Editor --> Open --> choose the training image
 
+# create box file
+# tesseract num.font.exp0.tif num.font.exp0 batch.nochop makebox
+
 lang='ASML'
 fontname='logo'
 num='0'
