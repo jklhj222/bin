@@ -10,7 +10,7 @@
    *_output_Score.txt (original_score,norm_score) in directory "split" .  And the scores of all
    grids will be saved to all_scores.txt, the file can be plot the contour picture by gnuplot.
 
-4. python3 OCR_test_plot.py --img_dir split
+4. python3 OCR_test_plot.py --img_dir split --file_ext jpg
    To visualize the result and the score of each grid. The result will be saved in test.png 
    (the output file name can be change by --out_file option).
 

@@ -10,6 +10,7 @@ parser = argparse.ArgumentParser()
 
 parser.add_argument('--img_dir', default=None)
 parser.add_argument('--out_file', default='test.png')
+parser.add_argument('--file_ext', default=None, help='jpg, png or ...')
 parser.add_argument('--dis', default=None)
 parser.add_argument('--fig_size', default=100, help='default:100')
 parser.add_argument('--subfig_size', default=200, help='default:100')
@@ -22,8 +23,9 @@ img_dir = args.img_dir
 dis = args.dis
 fig_size = (int(args.fig_size), int(args.fig_size))
 subfig_size = (int(args.subfig_size), int(args.subfig_size))
+ext_name = args.file_ext
 
-files = glob.glob(img_dir + '/*.jpg')
+files = glob.glob(img_dir + '/*.' + ext_name)
 
 ncols = int(math.sqrt(len(files)))
 nrows = math.ceil(len(files) / ncols)

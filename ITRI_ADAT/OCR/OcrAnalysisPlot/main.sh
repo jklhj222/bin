@@ -13,5 +13,5 @@ bash tesseract_test.sh
 #3
 python3 OCR_score.py --img_dirs "['split']" --test_string "$test_string" --score_type "$score_type" --perfect_score_min "$perfect_score_min"
 #4
-python3 OCR_test_plot.py --img_dir split
+python3 OCR_test_plot.py --img_dir split --file_ext "$file_ext"
 

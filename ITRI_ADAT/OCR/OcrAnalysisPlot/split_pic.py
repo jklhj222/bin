@@ -63,7 +63,7 @@ for i in range(divide_num):
         print(i*width_interval, j*height_interval, 
               (i+1)*width_interval, (j+1)*height_interval)
 
-        img2.save('split/' + str(i) + '_' + str(j) + '.jpg')
+        img2.save('split/' + str(i) + '_' + str(j) + '.' + ext_name)
 
 img_RGB.save(file_name + '_grid.' + ext_name)
   
