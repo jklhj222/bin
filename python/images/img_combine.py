@@ -20,7 +20,6 @@ def image_combine(imgs):
         subimg = Image.open(img)
 
         toImage.paste(subimg, (0, i*img_sizes[0][1]))
-        print(img, i, i*img_sizes[0][1])
 
     return toImage
 
@@ -33,10 +32,15 @@ if __name__ == '__main__':
     parser.add_argument('--imgs',
                         default=None)
 
+    parser.add_argument('--out_img',
+                         default=None, 
+                         help='default = "test.png"')
+
     args = parser.parse_args()
 
     imgs = eval(args.imgs)
-   
+    out_img = args.out_img   
+
     toImage = image_combine(imgs)
     
-    toImage.save('test.png')
+    toImage.save(out_img)
