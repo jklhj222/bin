@@ -66,17 +66,18 @@ def ComputeSTD(file_list, RGB_mean):
 
  
 if __name__ == '__main__':
-    path = '/home/hugh/Dropbox/tmp-PC/pytorch/train_data'
+    path = '/home/hugh/data/surface_defect/NEU-DET/NEU-DET/IMAGES.DataFolder'
 
     file_list = GetFileList(path)
+    print('\n# files: ', len(file_list))
 
     R_mean, G_mean, B_mean = ComputeMean(file_list)
-    print('RGB mean: ', R_mean, G_mean, B_mean)
-    print('RGB mean: ', R_mean/255, G_mean/255, B_mean/255, '\n')
+    print('RGB mean: ', R_mean, ',', G_mean, ',', B_mean)
+    print('RGB mean: ', R_mean/255, ',', G_mean/255, ',', B_mean/255, '\n')
 
     R_std, G_std, B_std = ComputeSTD(file_list, (R_mean, G_mean, B_mean))
-    print('RGB std: ', R_std, G_std, B_std)
-    print('RGB std: ', R_std/255, G_std/255, B_std/255)
+    print('RGB std: ', R_std, ',', G_std, ',', B_std)
+    print('RGB std: ', R_std/255, ',', G_std/255, ',', B_std/255)
 
 
 

@@ -12,7 +12,7 @@ from config import DefaultConfig as DC
 import val
 
 train_transform = T.Compose([
-        T.Resize(DC.input_size),
+        T.Resize((DC.input_size, DC.input_size)),
         T.Grayscale(),
 #        T.RandomResizedCrop(224),
         T.RandomHorizontalFlip(),
@@ -67,7 +67,7 @@ model = resnet152(pretrained=DC.pretrained)
 #                               bias=False)
 avgpool_kernel_size = 16 
 num_ftrs = model.fc.in_features
-model.fc = t.nn.Linear(num_ftrs, 2)
+model.fc = t.nn.Linear(num_ftrs, DC.num_classes)
 model.avgpool = t.nn.AvgPool2d(avgpool_kernel_size, stride=1, padding=0)
 
 if DC.use_gpu: model.cuda(DC.train_gpu_id)

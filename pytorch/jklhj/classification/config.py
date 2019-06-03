@@ -5,6 +5,7 @@ class DefaultConfig():
     
     use_gpu = True 
     num_workers = 2
+    num_classes = 7
 
     input_size = 512
 

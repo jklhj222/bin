@@ -17,7 +17,7 @@ def val(in_train, model, transform, val_data, dataloader):
     if not in_train:    
         avgpool_kernel_size = 16
         num_ftrs = model.fc.in_features
-        model.fc = t.nn.Linear(num_ftrs, 2)
+        model.fc = t.nn.Linear(num_ftrs, num_classes)
         model.avgpool = t.nn.AvgPool2d(avgpool_kernel_size, stride=1, padding=0)
     
     if DC.use_gpu:
