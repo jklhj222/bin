@@ -37,7 +37,7 @@ train_dataloader = t.utils.data.DataLoader(train_data,
 
 if DC.val_in_train:
     val_transform = T.Compose([
-            T.Resize(DC.input_size),
+            T.Resize((DC.input_size, DC.input_size)),
 #            T.RandomResizedCrop(224),
             T.ToTensor(),
             DC.normalize
