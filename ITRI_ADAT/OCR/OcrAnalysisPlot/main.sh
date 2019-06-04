@@ -1,10 +1,11 @@
 #!/bin/bash
 
-img_file='new9.bmp'
+img_file='dis10_H31_L15_201904191516_四LED管_front_aria_font3_bold_best_focus.jpg'
 divide_num=15
-test_string='0123456789012345678901234567890'
+test_string='01234567890123456789012345678900123456789012345678901234567890'
 score_type='length'
 perfect_score_min=3
+file_ext='jpg'
 
 #1
 python3 split_pic.py --img_file "$img_file" --divide_num "$divide_num"
