@@ -1,7 +1,7 @@
 1. python3 split_pic.py
    The picture will be splited into small pieces in directory "split" .
 
-2. bash tesseract_test.sh
+2. bash tesseract_test.sh 15 15
    The small pictures will be sent to tesseract to do the analyse, and save the result into
    *_output.txt files  in directory "split" .
 
