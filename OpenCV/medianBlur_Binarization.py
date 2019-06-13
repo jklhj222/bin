@@ -17,12 +17,26 @@ def adaptiveThresh(I, winSize, ratio=0.15):
  
     return out
 
+def calcGrayHist(image):
+    rows, cols = image.shape
+
+    grayHist = np.zeros([256], np.uint8)
+
+    for r in range(rows):
+        for c in range(cols):
+            grayHist[image[r][c]] += 1
+
+    return grayHist
+
+
 #img = cv2.imread('Sc_257.bmp')
-img = cv2.imread('2019-05-30_10.42.14.jpg', 0)
+img = cv2.imread('587465-cut.png', 0)
 
 width, height = img.shape
 img = cv2.resize(img, (int(width*0.3), int(height*0.3)))
 
+img_hist = calcGrayHist(img)
+print(img_hist, img_hist.shape)
 
 adap = adaptiveThresh(img, (31,31))
 
