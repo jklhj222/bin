@@ -27,10 +27,13 @@ def image_combine(imgs):
 if __name__ == '__main__':
     import argparse
 
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(
+               description='combine two images into one image,
+                            the argument --imgs=a list of two image names.')
 
     parser.add_argument('--imgs',
-                        default=None)
+                        default=None
+                        help="['image1', 'image2']")
 
     parser.add_argument('--out_img',
                          default=None, 
