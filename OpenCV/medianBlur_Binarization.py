@@ -4,10 +4,10 @@
 import cv2
 import numpy as np
 
-def adaptiveThresh(I, winSize, ratio=0.15):
-    I_mean = cv2.boxFilter(I, cv2.CV_32FC1, winSize)
+def adaptiveThresh(img, winSize, ratio=0.15):
+    img_mean = cv2.boxFilter(img, cv2.CV_32FC1, winSize)
 
-    out = I - (1.0-ratio)*I_mean
+    out = img - (1.0-ratio)*img_mean
 
     out[out>=0] = 255
  
