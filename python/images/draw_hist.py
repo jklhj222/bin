@@ -3,9 +3,16 @@
 import cv2
 import numpy as np
 import matplotlib.pyplot as plt
+import argparse
+
+parser = argparse.ArgumentParser()
+
+parser.add_argument('--img_file', default=None)
+
+args = parser.parse_args()
 
 # read image file
-img = cv2.imread('cut2-4.png')
+img = cv2.imread(args.img_file)
 
 # to grayscale
 gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
