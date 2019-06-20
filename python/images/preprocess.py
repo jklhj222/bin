@@ -57,7 +57,7 @@ def preprocess(img_file, resize=None):
 
     return img, img_adap, img_otsu, img_gauss, spectrum
 
-def plot(imgs, figsize, subplot):
+def plot(imgs, figsize, subplot, savefig=None):
     plt.figure(num='test',figsize=figsize)
 
     for i, img in enumerate(imgs):
@@ -73,6 +73,8 @@ def plot(imgs, figsize, subplot):
         plt.imshow(imgs[img], cmap=plt.cm.gray)
 
         plt.axis('off')
+
+    if savefig is not None: plt.savefig(savefig)
 
     plt.show()
 
@@ -99,7 +101,6 @@ if __name__ == '__main__':
                  ('fft', spectrum)]
 
     imgs = collections.OrderedDict(imgs_list)
-
 
     plot(imgs, (8, 8), [3, 3])
 
