@@ -37,6 +37,14 @@ def yolo_cut(img_dir, label_dir, obj_file):
             file_name = os.path.basename(img_file).split('.png')[0]
             ext = 'png'
  
+        elif '.JPG' in img_file:
+            file_name = os.path.basename(img_file).split('.JPG')[0]
+            ext = 'JPG'
+ 
+        elif '.PNG' in img_file:
+            file_name = os.path.basename(img_file).split('.PNG')[0]
+            ext = 'PNG'
+ 
         else:
             continue
 
@@ -62,7 +70,7 @@ def yolo_cut(img_dir, label_dir, obj_file):
                                  (cy+h/2.0)*img_height) )
 
             cut_files_dir = os.path.join('./cut', objs[clas])
-            print(cut_files_dir)
+            print('cut' + str(idx))
 
             img_cut.save(os.path.join(cut_files_dir, 
                                       file_name + '_' + 
@@ -71,4 +79,4 @@ def yolo_cut(img_dir, label_dir, obj_file):
                                       ext) )
 
 if __name__ == '__main__':
-   yolo_cut('./images_gray', './labels_gray', 'obj.names') 
+   yolo_cut('./images', './labels', 'obj.names') 
