@@ -18,8 +18,8 @@ parser.add_argument('--img_dir', default=None)
 parser.add_argument('--out_dir', default=None)
 parser.add_argument('--gpu_idx', default=0)
 parser.add_argument('--ext_ratio', 
-                    default=0.2, 
-                    help='set to extend the bonding box of face, dafault=0.2')
+                    default=0.4, 
+                    help='set to extend the bonding box of face, dafault=0.4')
 parser.add_argument('--show_img',
                     default=False,
                     help='default: False',
@@ -54,31 +54,50 @@ for img_file in os.listdir(image_dir):
         dets = detector(img, 1)                   #使用檢測運算元檢測人臉，返回的是所有的檢測到的人臉區域
 
         for k, d in enumerate(dets):
-            rec = dlib.rectangle(d.rect.left(),d.rect.top(),d.rect.right(),d.rect.bottom())
+            rec = dlib.rectangle( d.rect.left(),
+                                  d.rect.top(),
+                                  d.rect.right(),
+                                  d.rect.bottom() )
 
             width = rec.right() - rec.left()
             height = rec.bottom() - rec.top()
            
             ext_left   = int(rec.left() - width*ext_ratio) \
                            if int(rec.left() - width*ext_ratio) > 0 else 1
+
             ext_right  = int(rec.right() + width*ext_ratio) \
-                           if int(rec.right() + width*ext_ratio) < img.shape[1] else img.shape[1]
+                           if int(rec.right() + width*ext_ratio) \
+                           < img.shape[1] else img.shape[1]
+
             ext_top    = int(rec.top() - height*ext_ratio) \
                            if int(rec.top() - height*ext_ratio) > 0 else 1
+
             ext_bottom = int(rec.bottom() + height*ext_ratio) \
-                           if int(rec.bottom() + height*ext_ratio) < img.shape[0] else img.shape[0]
+                           if int(rec.bottom() + height*ext_ratio) \
+                           < img.shape[0] else img.shape[0]
 
             img_cut = img[ext_top:ext_bottom, ext_left:ext_right]
 
-            cv2.imwrite(os.path.join(out_dir, filename + '_' + str(k) + '.jpg'), img_cut)
+            cv2.imwrite(os.path.join(out_dir, 
+                                     filename + '_' + str(k) + '.jpg'), 
+                        img_cut)
 
             if args.show_img:
-#                cv2.rectangle(img, (rec.left(), rec.top()), (rec.right(), rec.bottom()), (0, 255, 0), 2)
-                cv2.rectangle(img_bbox, (ext_left, ext_top), (ext_right, ext_bottom), (0, 255, 0), 2)   
+                cv2.rectangle(img_bbox, 
+                              (ext_left, ext_top), 
+                              (ext_right, ext_bottom), 
+                              (0, 255, 0), 
+                              2)   
 
                 text = "{:d}".format(k) 
-                cv2.putText(img_bbox, text, (ext_right, ext_top), cv2.FONT_HERSHEY_DUPLEX,
-                            0.7, (255, 255, 255), 1, cv2.LINE_AA)
+                cv2.putText(img_bbox, 
+                            text, 
+                            (ext_right, ext_top), 
+                            cv2.FONT_HERSHEY_DUPLEX,
+                            0.7, 
+                            (255, 255, 255), 
+                            1, 
+                            cv2.LINE_AA)
 
         if args.show_img:
             cv2.imshow('image', img_bbox)
