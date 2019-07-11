@@ -1,3 +1,6 @@
 #!/bin/bash
 
-ffmpeg -i video.avi frames_%05d.jpg
+videoFile='video.avi'
+outDir='frames'
+
+ffmpeg -i "$videoFile" "$outDir"'/frames_%05d.jpg'
