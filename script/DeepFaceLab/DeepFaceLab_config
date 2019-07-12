@@ -1,0 +1,68 @@
+https://deepfakes.com.cn/index.php/553.html
+
+data_src/  拆完要替換的人物圖(還不是臉)
+data_dst/  拆完要被替換的人物圖(還不是臉)
+
+data_src/aligned  拆完要替換的人物臉圖
+data_dst/aligned  拆完要被替換的人物臉圖
+
+data_dst/merged   換好人臉的圖片
+
+python3.6 main.py convert --input-dir data_dst
+                          --output-dir data_dst/merged
+                          --aligned-dir data_dst/aligned
+                          --model-dir model
+                          --model H128
+
+result.mp4   換完臉的影片
+
+python3.6 main.py videoed video-from-sequence
+                         --input-dir data_dst/merged
+                         --output-file result.mp4
+                         --reference-fle data_dst.mp4
+
+目標: 將A人物的臉換到B人物身上。
+1. 將影片擷取部份片段可使用  ffmpeg_extractFrame.sh  , 將影片拆成圖片可使用  ffmpeg_cutVideo.sh
+   a. 準備 A 人物的圖片(還未擷取臉)放到 data_src/
+   b. 準備 B 人物的圖片(還未擷取臉)放到 data_dst/
+
+2. 將圖片中人臉擷取使用  extract_face.sh
+   a. 擷取 A 的臉部圖片放到 data_src/aligned/ 
+   b. 擷取 B 的臉部圖片放到 data_dst/aligned/ 
+
+3. 將臉部圖片做資料清潔, 刪除模糊遮蔽的圖片
+   a. 開始訓練, 使用 train.sh 或 python3.6 main.py train --training-data-src-dir data_src/aligned --training-data-dst-dir data_dst/aligned --model-dir model-dir --model H64
+   b. 訓練完的模型檔放在  model-dir
+
+4. 用訓練完的模型合成人物圖片
+   a. 使用 combine.sh 將 B 的圖片換成 A 的臉
+   b. 換完人臉的圖片放在 data_dst/merged
+
+5. 將圖片合併成影片檔
+   a. 使用 ffmpeg_covert2mp4.sh 將圖片合併成影片
+   b. $refVideo 是B原始影片, 需加這個影片才有聲音
+   c. $outVideo 是合成後的影片檔
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
