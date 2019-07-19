@@ -24,5 +24,8 @@ convert -flop "$img_file" "$filename"'_flop.'"$fileext"  # Left_Right flip
 # Rotate the image (clockwise)
 convert -rotate 30 "$img_file" "$filename"'_rotate.'"$fileext"
 
-
+# convert file into another format. (ex. jpg or png)
+# the quality is from 1 (lowest image quality and highest compression) to  100 (best quality but least effective compression)
+# 0 means default, The default is to use the estimated quality of your input image if it can be determined, otherwise 92.
+convert -quality 90 "$img_file" "$filename"'_90.'"$fileext"
 
