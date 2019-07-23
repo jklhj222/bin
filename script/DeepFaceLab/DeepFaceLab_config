@@ -22,7 +22,7 @@ python3.6 main.py videoed video-from-sequence
                          --reference-fle data_dst.mp4
 
 目標: 將A人物的臉換到B人物身上。
-1. 將影片擷取部份片段可使用  ffmpeg_extractFrame.sh  , 將影片拆成圖片可使用  ffmpeg_cutVideo.sh
+1. 將影片擷取部份片段可使用  ffmpeg_cutVideo.sh , 將影片拆成圖片可使用  ffmpeg_extractFrame.sh
    a. 準備 A 人物的圖片(還未擷取臉)放到 data_src/
    b. 準備 B 人物的圖片(還未擷取臉)放到 data_dst/
 
