@@ -3,8 +3,11 @@
 from torch.autograd import Variable
 import torch as t
 from config import DefaultConfig as DC
+from progressbar import *
 
 def val(in_train, model, transform, val_data, dataloader):
+    progress = ProgressBar()
+
     model.eval()    
 
     val_transform = transform
@@ -35,8 +38,14 @@ def val(in_train, model, transform, val_data, dataloader):
     avg_loss = 0
     total_img = 0 
     correct_img = 0
-    
+
+    widgets = ['val progress: ', Percentage(), ' ', Bar('#'),' ',
+               Timer(), ' ', ETA()]
+ 
+    pbar = ProgressBar(widgets=widgets, maxval=10*num_val_data).start()
+
     for i, (data, label) in enumerate(val_dataloader):
+        pbar.update(10 * i + 1)
         with t.no_grad():
             if DC.use_gpu:
                 if not in_train:
@@ -72,7 +81,7 @@ def val(in_train, model, transform, val_data, dataloader):
                                             num_val_data, 
                                             prob[0].index(max(prob[0])),
                                             prob))
-    
+    pbar.finish()
     accuracy = (correct_img/total_img)*100
 
     if not in_train:    
