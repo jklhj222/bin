@@ -16,9 +16,9 @@ def generate(config):
     noises = t.randn(config.gen_search_num, config.nz, 1, 1)
     noises = noises.normal_(config.gen_mean, config.gen_std).to(device)
 
-    netg.load_state_dict(t.load(config.load_netg_model, 
+    netg.load_state_dict(t.load(config.test_netg_model, 
                                 map_location=lambda storage, loc: storage))
-    netd.load_state_dict(t.load(config.load_netd_model, 
+    netd.load_state_dict(t.load(config.test_netd_model, 
                                 map_location=lambda storage, loc: storage))
 
     netg.to(device)

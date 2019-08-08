@@ -34,12 +34,12 @@ train_dataloader = t.utils.data.DataLoader(train_data,
 netg = model.NetG(DC)
 netd = model.NetD(DC)
 
-if DC.load_netg_model: 
-    netg.load_state_dict(t.load(DC.load_netg_model,
+if DC.train_netg_model: 
+    netg.load_state_dict(t.load(DC.train_netg_model,
                                 map_location=lambda storage, loc: storage))
 
-if DC.load_netd_model: 
-    netd.load_state_dict(t.load(DC.load_netd_model,
+if DC.train_netd_model: 
+    netd.load_state_dict(t.load(DC.train_netd_model,
                                 map_location=lambda storage, loc: storage))
 
 netg.to(device)
@@ -65,8 +65,9 @@ noises = t.randn(batch_size, DC.nz, 1, 1).to(device)
 train_imgs = 0
 iteration = 0
 for epoch in range(DC.max_epoch):
+    print('epoch: ', epoch, 'iter: ', iteration)
     for i, (data, label) in tqdm.tqdm(enumerate(train_dataloader)):
-        train_imgs += DC.train_batch_size
+        train_imgs += batch_size
         iteration += 1
 
         if i % DC.g_train_every == 0:
@@ -92,6 +93,7 @@ for epoch in range(DC.max_epoch):
             loss_d_real.backward()
 
             # discriminate the fake picture as False as possible
+            noises.data.copy_(t.randn(batch_size, DC.nz, 1, 1))
             fake_data = netg(noises).detach()
 
             output = netd(fake_data)
@@ -105,10 +107,12 @@ for epoch in range(DC.max_epoch):
         if iteration % DC.save_iter == 0:
             fix_fake_imgs = netg(fix_noises)
             tv.utils.save_image(fix_fake_imgs.data[:64], 
-                                '{:s}/{:d}.png'.format(DC.pic_save_dir, 
-                                                       iteration),
+                                '{:s}/iter{:d}_epoch{}.png'.format(DC.pic_save_dir, 
+                                                       iteration, epoch),
                                 normalize=True, 
                                 range=(-1, 1))
 
             t.save(netg.state_dict(), 'netg_iter{}_epoch{}.pth'.format(iteration, epoch+1))
             t.save(netd.state_dict(), 'netd_iter{}_epoch{}.pth'.format(iteration, epoch+1))
+
+    print('loss_g: ', loss_g, 'loss_d', loss_d, 'netd_output: ', output[:100])

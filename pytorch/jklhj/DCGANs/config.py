@@ -5,23 +5,23 @@ class DefaultConfig():
     use_gpu = True
     num_workers = 2
     
-    input_size = 100
+    input_size = 96 
 
     # for training setting
     train_gpu_id = 0
 
-    load_netd_model = ''
-    load_netg_model = ''
+    train_netd_model = ''
+    train_netg_model = ''
 
     train_dir = './data'
-    train_batch_size = 768
-    base_lrg = 0.001
-    base_lrd = 0.001
+    train_batch_size = 256
+    base_lrg = 2e-4
+    base_lrd = 2e-4
 
     lr_decay_step = 100
 
-    g_train_every = 1
-    d_train_every = 5
+    g_train_every = 5
+    d_train_every = 1
 
     max_epoch = 200
 
@@ -32,11 +32,13 @@ class DefaultConfig():
     ndf = 64
 
     show_iter = 50
-    save_iter = 200
+    save_iter = 600
     pic_save_dir = './imgs'
 
     # for testing setting
     test_img = 'result.png'
+    test_netg_model = ''
+    test_netd_model = ''
 
     #  pick 64 best pictures of 512 generated pictures
     gen_num = 64
