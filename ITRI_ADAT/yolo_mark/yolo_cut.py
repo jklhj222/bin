@@ -28,7 +28,7 @@ def yolo_cut(img_dir, label_dir, obj_file):
     file_names = list(map(lambda x: os.path.basename(x), img_files))
     print(file_names)
 
-    for img_file in img_files:
+    for i, img_file in enumerate(img_files):
         if '.jpg' in img_file:
             file_name = os.path.basename(img_file).split('.jpg')[0]
             ext = 'jpg'       
@@ -52,7 +52,7 @@ def yolo_cut(img_dir, label_dir, obj_file):
         img_width, img_height = img.size
 
         label_file = os.path.join(label_dir, file_name + '.txt')
-        print(label_file)
+        print(i, label_file)
 
         with open(label_file, 'r') as f:
            lines = f.readlines()
@@ -70,13 +70,12 @@ def yolo_cut(img_dir, label_dir, obj_file):
                                  (cy+h/2.0)*img_height) )
 
             cut_files_dir = os.path.join('./cut', objs[clas])
-            print('cut' + str(idx))
+#            print('cut' + str(idx))
 
             img_cut.save(os.path.join(cut_files_dir, 
                                       file_name + '_' + 
                                       clas + '.' +
                                       str(idx) + '.' + 
                                       ext) )
-
 if __name__ == '__main__':
    yolo_cut('./images', './labels', 'obj.names') 
