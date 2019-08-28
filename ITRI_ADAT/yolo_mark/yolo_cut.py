@@ -26,7 +26,8 @@ def yolo_cut(img_dir, label_dir, obj_file):
     print(img_files)
 
     file_names = list(map(lambda x: os.path.basename(x), img_files))
-    print(file_names)
+    print(file_names, '\n')
+    print('total files: ', len(file_names))
 
     for i, img_file in enumerate(img_files):
         if '.jpg' in img_file:
@@ -52,7 +53,7 @@ def yolo_cut(img_dir, label_dir, obj_file):
         img_width, img_height = img.size
 
         label_file = os.path.join(label_dir, file_name + '.txt')
-        print(i, label_file)
+        print('{}/{}'.format(i+1, len(file_names)), label_file, end='\r')
 
         with open(label_file, 'r') as f:
            lines = f.readlines()
