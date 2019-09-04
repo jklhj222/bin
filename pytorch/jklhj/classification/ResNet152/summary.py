@@ -11,5 +11,5 @@ model = alexnet().cuda()
 
 print(summary(model, (3, 324, 324), device='cuda'))
 #print('model.fc.in_features: ', model.fc.in_features)
-#print('model.fc: ', model.fc)
+print('model.fc: ', model.fc)
 
