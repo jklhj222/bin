@@ -5,3 +5,4 @@ DATA_FILE = ./data/adat.data
 SHARED_LIB = ./libdarknet.so
 SHOW_IMG = False 
 SAVE_IMG = False
+SAVE_PATH = ./test_pic.jpg

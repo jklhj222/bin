@@ -43,6 +43,7 @@ if __name__ == '__main__':
     darknet_data = config['DARKNET']['DATA_FILE']
     show_img = eval(config['DARKNET']['SHOW_IMG'])
     save_img = eval(config['DARKNET']['SAVE_IMG'])
+    save_path = eval(config['DARKNET']['SAVE_PATH'])
 
     os.environ['CUDA_VISIBLE_DEVICES'] = args.gpu_idx
     print(os.environ['CUDA_VISIBLE_DEVICES'])
@@ -58,4 +59,4 @@ if __name__ == '__main__':
 
     print('\nNumber of objects: ', len(objs))
 
-    YoloObj.DrawBBox(objs, img, show_img, save_img)
+    YoloObj.DrawBBox(objs, img, save_path=save_path, show_img, save_img)

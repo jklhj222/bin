@@ -123,7 +123,8 @@ def ObjsPOI(innerObj, outerObj):
     return POI 
 
 
-def DrawBBox(objs, img, show=True, save=False, resize_ratio=None):
+def DrawBBox(objs, img, show=True, 
+             save=False, save_path='./test_pic.jpg', resize_ratio=None):
 #    import cv2
     for obj in objs:
         cv2.rectangle(img, (obj.l, obj.t), (obj.r, obj.b), (0, 255, 0), 5)
@@ -143,7 +144,8 @@ def DrawBBox(objs, img, show=True, save=False, resize_ratio=None):
 
         img = cv2.resize(img, (height, width))
 
-    if save == True: cv2.imwrite('test_pic.jpg', img)
+    if save == True: 
+        cv2.imwrite(save_path, img)
 
     if show == True:
         cv2.imshow('img', img)
