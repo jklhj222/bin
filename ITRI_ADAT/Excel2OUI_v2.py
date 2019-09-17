@@ -50,6 +50,9 @@ def write_step(lines, step, acttype, act, f_coord, t_coord,
     lines.append('\n')
 
 step = 1
+mv_step = 0
+shot_step = 0
+rotate_step = 0
 old_theta = '0'
 for i, Idx in enumerate(df_total['Index']):
     Xs = list(map(lambda x: x.strip(), df_total.iloc[i]['X'].split(',') ))
@@ -72,6 +75,7 @@ for i, Idx in enumerate(df_total['Index']):
                    Y1, Theta, Expos, Gain, WhiteBalance, Filename)
 
         step += 1
+        rotate_step += 1
 
     coords = [Xs, Ys, Zs]
     coords.sort(key=len, reverse=True)
@@ -98,6 +102,7 @@ for i, Idx in enumerate(df_total['Index']):
                            Side, Y1, Theta, Expos, Gain, WhiteBalance, Filename)
 
                 step += 1
+                mv_step += 1
 
                 # Shot
                 acttype = 3 if df_total.iloc[i]['Side'] == 't' else 2
@@ -110,6 +115,7 @@ for i, Idx in enumerate(df_total['Index']):
                 coords[0] = coords[0][::-1]
 
                 step += 1
+                shot_step += 1
           
     old_theta = Theta
 
@@ -132,7 +138,12 @@ with open(out_file, 'w') as f:
     for line in lines:
         f.write(line)
 
-print('total steps:', step-1)
+print()
+print('{:>17s}{}'.format('total steps: ', step-1))
+print('{:>17s}{}'.format('translate steps: ', mv_step))
+print('{:>17s}{}'.format('rotate steps: ', rotate_step))
+print('{:>17s}{}'.format('shot steps: ', shot_step))
+print()
 print('input file: ', in_file)
 print('output file:', out_file)
 
