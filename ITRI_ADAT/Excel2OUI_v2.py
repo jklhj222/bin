@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import pandas as pd
+from itertools import product
 
 # The file to read
 in_file = 'Chinup_data_collection_plan_forFomat.xlsx'
@@ -84,38 +85,37 @@ for i, Idx in enumerate(df_total['Index']):
     Ys_idx = coords.index(Ys)
     Zs_idx = coords.index(Zs)
 
-    for outer in coords[2]:
-        for mid in coords[1]:
-            for inner in coords[0]:
-                loop_list = [inner, mid, outer]
+    for outer, mid in product(coords[2], coords[1]):
+        for inner in coords[0]:
+            loop_list = [inner, mid, outer]
 
-                X = loop_list[Xs_idx]
-                Y = loop_list[Ys_idx]
-                Z = loop_list[Zs_idx]
+            X = loop_list[Xs_idx]
+            Y = loop_list[Ys_idx]
+            Z = loop_list[Zs_idx]
 
-                # Translate
-                acttype = 1
-                act = 2 if df_total.iloc[i]['Side'] == 't' else 1
-                Filename = 'None'
+            # Translate
+            acttype = 1
+            act = 2 if df_total.iloc[i]['Side'] == 't' else 1
+            Filename = 'None'
 
-                write_step(lines, step, acttype, act, (X, Y, Z), (X, Y, Z),
-                           Side, Y1, Theta, Expos, Gain, WhiteBalance, Filename)
+            write_step(lines, step, acttype, act, (X, Y, Z), (X, Y, Z),
+                       Side, Y1, Theta, Expos, Gain, WhiteBalance, Filename)
 
-                step += 1
-                mv_step += 1
+            step += 1
+            mv_step += 1
 
-                # Shot
-                acttype = 3 if df_total.iloc[i]['Side'] == 't' else 2
-                act = 32 if df_total.iloc[i]['Side'] == 't' else 16
-                Filename = '{}side_{}X_{}Y_{}Z'.format(Side.upper(), X, Y, Z)
+            # Shot
+            acttype = 3 if df_total.iloc[i]['Side'] == 't' else 2
+            act = 32 if df_total.iloc[i]['Side'] == 't' else 16
+            Filename = '{}side_{}X_{}Y_{}Z'.format(Side.upper(), X, Y, Z)
 
-                write_step(lines, step, acttype, act, (X, Y, Z), (X, Y, Z),
-                           Side, Y1, Theta, Expos, Gain, WhiteBalance, Filename)
+            write_step(lines, step, acttype, act, (X, Y, Z), (X, Y, Z),
+                       Side, Y1, Theta, Expos, Gain, WhiteBalance, Filename)
 
-                coords[0] = coords[0][::-1]
+            coords[0] = coords[0][::-1]
 
-                step += 1
-                shot_step += 1
+            step += 1
+            shot_step += 1
           
     old_theta = Theta
 

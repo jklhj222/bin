@@ -14,7 +14,7 @@ convert -threshold 50% "$img_file" "$filename"'_thres.'"$fileext"
 convert -colorspace Gray "$img_file" "$filename"'_gray.'"$fileext"
 
 # Resize the image
-convert -resize 100x100 "$img_file" "$filename"'_resize.'"$fileext"
+convert -resize 100x100\! "$img_file" "$filename"'_resize.'"$fileext"
 convert -resize 50%x50% "$img_file" "$filename"'_resize.'"$fileext"
 
 # Flip the image
