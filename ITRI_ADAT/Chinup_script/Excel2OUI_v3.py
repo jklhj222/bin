@@ -154,7 +154,7 @@ for i, Idx in enumerate(df_total['Index']):
     old_theta = Theta
 
 # write to file
-lines.insert(0, '[StepDate]\n')
+lines.insert(0, '[StepData]\n')
 lines.insert(1, 'AllStep={}\n'.format(step-1))
 #idx = 2
 #for ofs in ('f', 'r', 'l', 'b', 't'):
