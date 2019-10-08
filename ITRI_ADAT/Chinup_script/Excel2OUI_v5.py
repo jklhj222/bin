@@ -4,8 +4,8 @@ import pandas as pd
 from itertools import product
 
 # The file to read
-in_file = 'Chinup_data_collection_plan_forScratch_v5_Interval15mm.xlsx'
-out_file = 'OUI_script_v5_Scratch_Interval15mm.txt'
+in_file = 'Chinup_data_collection_plan_forScratch_v5_Interval15mm_new2.xlsx'
+out_file = 'OUI_script_v5_Scratch_Interval15mm_new2.txt'
 
 #all_offset = {'f':(1.1, 2.2, 3.3), 
 #              'r':(4, 5, 6), 
@@ -112,6 +112,7 @@ for i, Idx in enumerate(df_total['Index']):
     Ys_idx = coords.index(Ys)
     Zs_idx = coords.index(Zs)
 
+    mv_idx = 0
     for outer, mid in product(coords[2], coords[1]):
         for inner in coords[0]:
             loop_list = [inner, mid, outer]
@@ -133,6 +134,7 @@ for i, Idx in enumerate(df_total['Index']):
 
             step += 1
             mv_step += 1
+            mv_idx += 1
 
             # Shot
             acttype = 3 if Side == 't' else 2
@@ -157,8 +159,8 @@ for i, Idx in enumerate(df_total['Index']):
 #                Z_name = Z + 'd'
                 Z_name = Z
 
-            Filename = '{}side_{}_{}X_{}Y_{}Z'.format(Side.upper(), Idx,
-                                                      X_name, Y_name, Z_name)
+            Filename = '{}side_{}_{:04d}_{}X_{}Y_{}Z'.format(
+                         Side.upper(), Idx, mv_idx, X_name, Y_name, Z_name)
 
             P_numbers = ''
             for Expos in Exposes:

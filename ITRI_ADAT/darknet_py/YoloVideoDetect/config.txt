@@ -1,0 +1,5 @@
+[DARKNET]
+CFG = /home/hugh/tmp/AACL_AI_Training_material_20190403_360inspection/yolo_4class/cfg/yolov3.cfg
+WEIGHTS = /home/hugh/tmp/AACL_AI_Training_material_20190403_360inspection/yolo_4class/backup/yolov3.backup
+DATA_FILE = /home/hugh/tmp/AACL_AI_Training_material_20190403_360inspection/yolo_4class/cfg/adat.data
+SHARED_LIB = ./libdarknet.so
