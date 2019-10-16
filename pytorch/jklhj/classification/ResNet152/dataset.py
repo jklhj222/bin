@@ -1,4 +1,5 @@
 from torchvision import transforms as T
+from torchvision.datasets import ImageFolder
 from torch.utils import data
 from PIL import Image
 import os
@@ -31,3 +32,16 @@ class TestDataset(data.Dataset):
     def __len__(self):
         return len(self.imgs)
 
+
+class ValImageFolder(ImageFolder):
+    def __getitem__(self, index):
+
+        # original ImageFolder normally returns
+        original_tuple = super(ValImageFolder, self).__getitem__(index)
+
+        # image file path
+        path = self.imgs[index][0]
+
+        tuple_with_path = (original_tuple + (path, ))
+
+        return tuple_with_path

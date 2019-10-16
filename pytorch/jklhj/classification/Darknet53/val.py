@@ -4,6 +4,7 @@ from torch.autograd import Variable
 import torch as t
 from progressbar import *
 
+from dataset import ValImageFolder
 from config import DefaultConfig as DC
 
 def val(in_train, model, transform, val_data, dataloader):
@@ -23,6 +24,15 @@ def val(in_train, model, transform, val_data, dataloader):
         if not in_train: 
             model.to('cuda:' + str(DC.val_gpu_id))
 
+    if not in_train:
+        f = open('miss_predict.txt', 'w')
+        cls_dict = {}
+        with open('classes.dat', 'r') as cls:
+            for line in cls:
+                (key, value) = line.split(' : ')
+
+                cls_dict[int(key)] = value.rstrip('\n')
+
     if not in_train: model.load_state_dict(
                        t.load(DC.val_model,
                               map_location=lambda storage,
@@ -40,7 +50,13 @@ def val(in_train, model, transform, val_data, dataloader):
  
     pbar = ProgressBar(widgets=widgets, maxval=10*num_val_data).start()
 
-    for i, (data, label) in enumerate(val_dataloader):
+#    for i, (data, label) in enumerate(val_dataloader):
+    for output in enumerate(val_dataloader):
+        if in_train:
+            i, (data, label) = output
+        else:
+            i, (data, label, path) = output
+
         pbar.update(10 * i + 1)
         with t.no_grad():
             if DC.use_gpu:
@@ -70,11 +86,21 @@ def val(in_train, model, transform, val_data, dataloader):
                          / (DC.val_batch_size*(i+1))
     
             prob = t.nn.functional.softmax(score, dim=1)[:1].data.tolist()
+            predicted = prob[0].index(max(prob[0]))
     
             total_img += 1
-            if label.tolist()[0] == prob[0].index(max(prob[0])):
+            if label.tolist()[0] == predicted:
                 correct_img += 1
 
+            else:
+                print('wrong: ', path[0])
+                f.write('image: {}, '.format(path) +  \
+                        '  predict: {}({}), '.format(predicted,
+                                                     cls_dict[predicted]) + \
+                        '  ground_truth: {}({}), '.format(label.tolist()[0],
+                                                          cls_dict[label.tolist()[0]]) + \
+                        '  prob: {:.3f}\n'.format(max(prob[0])))
+            
             if not in_train:
                 print('{}/{} {}  {}'.format(i+1, 
                                             num_val_data, 
@@ -105,8 +131,10 @@ if __name__ == '__main__':
             T.ToTensor(),
             DC.normalize])
     
-    val_data = ImageFolder(DC.val_dir,
-                           transform=val_transform)
+#    val_data = ImageFolder(DC.val_dir,
+#                           transform=val_transform)
+    val_data = ValImageFolder(DC.val_dir,
+                              transform=val_transform)
 
     val_dataloader = t.utils.data.DataLoader(val_data,
                                              batch_size=DC.val_batch_size,
