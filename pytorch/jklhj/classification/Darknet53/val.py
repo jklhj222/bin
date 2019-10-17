@@ -92,7 +92,7 @@ def val(in_train, model, transform, val_data, dataloader):
             if label.tolist()[0] == predicted:
                 correct_img += 1
 
-            else:
+            elif not in_train:
                 print('wrong: ', path[0])
                 f.write('image: {}, '.format(path) +  \
                         '  predict: {}({}), '.format(predicted,
