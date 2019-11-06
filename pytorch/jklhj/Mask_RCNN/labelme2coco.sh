@@ -1,6 +1,6 @@
 #!/bin/bash
 
-filename=trainval.json.bk
+filename=trainval.json
 
 num_img=6
 num_category=2

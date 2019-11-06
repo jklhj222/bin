@@ -124,7 +124,7 @@ for i, (data, img_path, img_width, img_height) in enumerate(test_dataloader):
         semantic = np.zeros([img_height.int(), img_width.int()])
         for i in range(new_masks.shape[0]):
 #        for i in range(1):
-            if output[0]['scores'][i] > obj_thres: 
+            if output[0]['scores'][i] >= obj_thres: 
                 semantic += new_masks[i, 0, ...]
 #            plt.imshow(new_masks[2, 0, ...])
 
@@ -137,7 +137,7 @@ for i, (data, img_path, img_width, img_height) in enumerate(test_dataloader):
         print() 
 
     print('np.max0: ', np.max(semantic))
-    semantic[ semantic > seg_thres ] = 120
+    semantic[ semantic >= seg_thres ] = 120
     print('semantic: ', semantic.shape) 
     print(img[..., 1].shape)
     print('np.max1: ', np.max(semantic))
