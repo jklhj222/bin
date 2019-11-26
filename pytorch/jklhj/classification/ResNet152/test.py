@@ -14,6 +14,7 @@ input_size = DC.input_size
 num_workers = DC.num_workers
 title_output = DC.title_output
 normalize = DC.normalize
+num_classes = DC.num_classes
 
 model = resnet152()
 model.eval()
