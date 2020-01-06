@@ -1,0 +1,10 @@
+/mnt/sdc1/work/LST_test/pen1/output/images/6960.png
+/mnt/sdc1/work/LST_test/pen1/output/images/2161.png
+/mnt/sdc1/work/LST_test/pen1/output/images/6264.png
+/mnt/sdc1/work/LST_test/pen1/output/images/6122.png
+/mnt/sdc1/work/LST_test/pen1/output/images/230.png
+/mnt/sdc1/work/LST_test/pen1/output/images/9610.png
+/mnt/sdc1/work/LST_test/pen1/output/images/2514.png
+/mnt/sdc1/work/LST_test/pen1/output/images/4737.png
+/mnt/sdc1/work/LST_test/pen1/output/images/9679.png
+/mnt/sdc1/work/LST_test/pen1/output/images/6973.png
