@@ -17,6 +17,8 @@ parser.add_argument('--resize', default=1.0)
 
 parser.add_argument('--gpu_idx', default='0')
 
+parser.add_argument('--save_video', default=False, action='store_true')
+
 args = parser.parse_args()
 
 cfg_file = 'config.txt'
@@ -25,6 +27,8 @@ config.read(cfg_file)
 
 cap = cv2.VideoCapture(args.video_path)
 fps = cap.get(cv2.CAP_PROP_FPS)
+width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH) * float(args.resize))
+height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT) * float(args.resize))
 print('fps:', fps)
 
 darknet_cfg = config['DARKNET']['CFG']
@@ -50,20 +54,36 @@ def yolo_img_detect(img, net, meta, darknet_data):
 
     return objs
 
+fourcc = cv2.VideoWriter_fourcc(*'XVID')
 
+if args.save_video:
+    out = cv2.VideoWriter('output.avi', fourcc, 30.0, (width, height))
+
+ii=0
 while (cap.isOpened()):
+    ii+=1
     ret, frame = cap.read()
-    frame = cv2.resize( frame, (int(frame.shape[1]*float(args.resize)), 
-                                int(frame.shape[0]*float(args.resize))) )
+    print('frame type: ', ii, ret, type(frame))
+    if not ret:
+        break
+
+#    frame = cv2.resize( frame, (int(frame.shape[1]*float(args.resize)), 
+#                                int(frame.shape[0]*float(args.resize))) )
+
+    frame = cv2.resize( frame, (width, height))
 
     cv2.imwrite('tmp.jpg', frame)
  
     objs = yolo_img_detect('tmp.jpg', net, meta, darknet_data)
 
+    new_objs = [obj for obj in objs if obj.name != 'background']
     for obj in objs:
         print('obj: ', obj.name, obj.conf)
 
     img = YoloObj.DrawBBox(objs, frame, show=False, save=False)
+
+    if args.save_video:
+        out.write(img)
 
     cv2.imshow('frame', img)
 
@@ -72,6 +92,7 @@ while (cap.isOpened()):
     if k == 27 or k== ord('q'):
         break
 
+print('predict finished.')
 
 cap.release()
 cv2.destroyAllWindows()
