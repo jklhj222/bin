@@ -13,15 +13,20 @@ parser = argparse.ArgumentParser()
 
 parser.add_argument('--video_path', default=None)
 
+parser.add_argument('--cfg_file', default='config.txt')
+
 parser.add_argument('--resize', default=1.0)
 
 parser.add_argument('--gpu_idx', default='0')
 
 parser.add_argument('--save_video', default=False, action='store_true')
 
+parser.add_argument('--thresh', default=0.25)
+
 args = parser.parse_args()
 
-cfg_file = 'config.txt'
+#cfg_file = 'config.txt'
+cfg_file = args.cfg_file
 config = configparser.RawConfigParser()
 config.read(cfg_file)
 
@@ -45,7 +50,7 @@ def yolo_img_detect(img, net, meta, darknet_data):
     import YoloObj
 
     results = DFUNC.detect(net, meta, bytes(img, encoding='utf-8'),
-                           thresh=0.25)
+                           thresh=float(args.thresh))
 
     objs = []
     for result in results:
