@@ -23,6 +23,8 @@ parser.add_argument('--save_video', default=False, action='store_true')
 
 parser.add_argument('--thresh', default=0.25)
 
+parser.add_argument('--exclude_objs', nargs='+', default='background')
+
 args = parser.parse_args()
 
 #cfg_file = 'config.txt'
@@ -81,11 +83,11 @@ while (cap.isOpened()):
  
     objs = yolo_img_detect('tmp.jpg', net, meta, darknet_data)
 
-    new_objs = [obj for obj in objs if obj.name != 'background']
-    for obj in objs:
+    new_objs = [obj for obj in objs if obj.name not in args.exclude_objs]
+    for obj in new_objs:
         print('obj: ', obj.name, obj.conf)
 
-    img = YoloObj.DrawBBox(objs, frame, show=False, save=False)
+    img = YoloObj.DrawBBox(new_objs, frame, show=False, save=False)
 
     if args.save_video:
         out.write(img)
