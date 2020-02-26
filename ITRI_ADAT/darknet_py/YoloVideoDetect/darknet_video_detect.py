@@ -95,11 +95,11 @@ while (cap.isOpened()):
 
     if args.auto_label:
         if not os.path.isdir('images'): os.mkdir('images')
-        if not os.path.isdir('labels'): os.mkdir('labels')
+#        if not os.path.isdir('labels'): os.mkdir('labels')
 
         YoloObj.AutoLabeling(frame, new_objs, label_dict, 
                              'images/frame{:05d}.jpg'.format(ii),
-                             'labels/frame{:05d}.txt'.format(ii)
+                             'images/frame{:05d}.txt'.format(ii)
                             )
 
 
