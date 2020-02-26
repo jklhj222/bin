@@ -21,6 +21,8 @@ parser.add_argument('--gpu_idx', default='0')
 
 parser.add_argument('--save_video', default=False, action='store_true')
 
+parser.add_argument('--auto_label', default=False, action='store_true')
+
 parser.add_argument('--thresh', default=0.25)
 
 parser.add_argument('--exclude_objs', nargs='+', default='background')
@@ -47,6 +49,10 @@ print(os.environ['CUDA_VISIBLE_DEVICES'])
 
 net = DFUNC.load_net(bytes(darknet_cfg, 'utf-8'), bytes(darknet_weights, 'utf-8'), 0)
 meta = DFUNC.load_meta(bytes(darknet_data, 'utf-8'))
+
+label_dict = {}
+for idx in range(meta.classes):
+    label_dict[meta.names[idx]] = idx
 
 def yolo_img_detect(img, net, meta, darknet_data):
     import YoloObj
@@ -86,6 +92,16 @@ while (cap.isOpened()):
     new_objs = [obj for obj in objs if obj.name not in args.exclude_objs]
     for obj in new_objs:
         print('obj: ', obj.name, obj.conf)
+
+    if args.auto_label:
+        if not os.path.isdir('images'): os.mkdir('images')
+        if not os.path.isdir('labels'): os.mkdir('labels')
+
+        YoloObj.AutoLabeling(frame, new_objs, label_dict, 
+                             'images/frame{:05d}.jpg'.format(ii),
+                             'labels/frame{:05d}.txt'.format(ii)
+                            )
+
 
     img = YoloObj.DrawBBox(new_objs, frame, show=False, save=False)
 
