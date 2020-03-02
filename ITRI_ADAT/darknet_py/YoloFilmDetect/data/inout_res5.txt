@@ -1,1 +1,0 @@
-{"filename":"./data/images/1.jpg","tag":[{"abnormal":69,"left":199,"right":295,"top":621,"bot":670},{"abnormal":79,"left":723,"right":815,"top":442,"bot":497},{"abnormal":79,"left":405,"right":530,"top":134,"bot":190}]}

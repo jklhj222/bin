@@ -1,3 +1,0 @@
-path_update=update20180720/
-path_data=../data/
-path_example=02_TAT_sensor_abnormal_60_165.MTS

@@ -1,6 +1,0 @@
-classes=3
-train  = data/train.txt
-valid  = data/train.txt
-names = demo/data/adat.names
-backup = backup/
-

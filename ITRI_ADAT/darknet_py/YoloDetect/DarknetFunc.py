@@ -32,9 +32,9 @@ class METADATA(ctypes.Structure):
                 ("names", POINTER(c_char_p))]
 
 def detect(net, meta, image, thresh=.5, hier_thresh=.5, nms=.45):
-    im = array_to_image(image)
-    rgbgr_image(im)
-#    im = load_image(image, 0, 0)
+#    im = array_to_image(image)
+#    rgbgr_image(im)
+    im = load_image(image, 0, 0)
 #    print('detect_image: ', image)
 #    print('detect_im: ', im)
 
@@ -52,8 +52,8 @@ def detect(net, meta, image, thresh=.5, hier_thresh=.5, nms=.45):
                 b = dets[j].bbox
                 res.append((meta.names[i], dets[j].prob[i], (b.x, b.y, b.w, b.h)))
     res = sorted(res, key=lambda x: -x[1])
-    #free_image(im)
-    free_detections(dets, num)
+#    free_image(im)
+#    free_detections(dets, num)
     return res
 
 def array_to_image(arr):
