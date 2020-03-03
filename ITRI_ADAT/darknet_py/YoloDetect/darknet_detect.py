@@ -21,9 +21,6 @@ parser.add_argument('--gpu_idx', default='0', help='default=0')
 
 parser.add_argument('--thresh', default=0.25, help='default=0.25')
 
-parser.add_argument('--exclude_objs', nargs='+', default='background',
-                    help='default="background"')
-
 subparsers = parser.add_subparsers(dest='subparsers', help='img_detect, video_detect')
 
 # parameters for single image detection.
@@ -37,6 +34,9 @@ parser_img.add_argument('--noshow_img', default=False,
 
 parser_img.add_argument('--save_img', default=False, 
                         action='store_true', help='default=False')
+
+parser_img.add_argument('--exclude_objs', nargs='+', default='background',
+                        help='default="background"')
 
 # parameters for video detection.
 parser_video = subparsers.add_parser('video_detect', 
@@ -52,6 +52,9 @@ parser_video.add_argument('--auto_label', default=False, action='store_true',
 
 parser_video.add_argument('--skip_nolabel', default=False, action='store_true',
                           help='default=False')
+
+parser_video.add_argument('--exclude_objs', nargs='+', default='background',
+                          help='default="background"')
 
 args = parser.parse_args()
 
@@ -94,12 +97,10 @@ def ImgDetect(img_path, net, meta, darknet_data, save_path='./',
     for obj in objs:
         print(obj.obj_string, obj.cx, obj.cy)
 
-    print('\nNumber of objects: ', len(objs))
+    print('Number of objects: ', len(objs), '\n')
 
     YoloObj.DrawBBox(objs, img, 
                      show=not noshow_img, save=save_img, save_path=save_path)
-
-    print('Prediction is finished.')
 
     return objs
 
@@ -123,7 +124,7 @@ def VideoDetect(video_path, label_dict,
     while (cap.isOpened()):
         ii+=1
         ret, frame = cap.read()
-        print('frame type: ', ii, ret, type(frame))
+        print('frame : ', ii, ret, type(frame))
         if not ret:
             break
 

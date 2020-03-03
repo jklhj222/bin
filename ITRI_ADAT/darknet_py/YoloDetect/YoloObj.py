@@ -145,7 +145,6 @@ def DrawBBox(objs, img, show=True,
         img = cv2.resize(img, (height, width))
 
     if save == True: 
-        print('test', save_path)
         cv2.imwrite(save_path, img)
 
     if show == True:
