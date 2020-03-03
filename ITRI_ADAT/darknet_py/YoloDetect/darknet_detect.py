@@ -32,6 +32,12 @@ parser_img = subparsers.add_parser('img_detect',
 parser_img.add_argument('--img_path', default=None, 
                         required=True, help='default=None')
 
+parser_img.add_argument('--noshow_img', default=False, 
+                        action='store_true', help='default=True')
+
+parser_img.add_argument('--save_img', default=False, 
+                        action='store_true', help='default=False')
+
 # parameters for video detection.
 parser_video = subparsers.add_parser('video_detect', 
                                      help='video detect.')
@@ -42,6 +48,9 @@ parser_video.add_argument('--save_video', default=False, action='store_true',
                           help='default=False')
 
 parser_video.add_argument('--auto_label', default=False, action='store_true',
+                          help='default=False')
+
+parser_video.add_argument('--skip_nolabel', default=False, action='store_true',
                           help='default=False')
 
 args = parser.parse_args()
@@ -58,7 +67,8 @@ darknet_data = config['DARKNET']['DATA_FILE']
 os.environ['CUDA_VISIBLE_DEVICES'] = args.gpu_idx
 print(os.environ['CUDA_VISIBLE_DEVICES'])
 
-net = DFUNC.load_net(bytes(darknet_cfg, 'utf-8'), bytes(darknet_weights, 'utf-8'), 0)
+net = DFUNC.load_net(bytes(darknet_cfg, 'utf-8'), 
+                     bytes(darknet_weights, 'utf-8'), 0)
 meta = DFUNC.load_meta(bytes(darknet_data, 'utf-8'))
 
 label_dict = {}
@@ -67,7 +77,7 @@ for idx in range(meta.classes):
 
 
 def ImgDetect(img_path, net, meta, darknet_data, save_path='./',
-              show_img=False, save_img=False):
+              noshow_img=True, save_img=False):
 
     import YoloObj
 
@@ -86,14 +96,16 @@ def ImgDetect(img_path, net, meta, darknet_data, save_path='./',
 
     print('\nNumber of objects: ', len(objs))
 
-    YoloObj.DrawBBox(objs, img, show=show_img, save=save_img, save_path=save_path)
+    YoloObj.DrawBBox(objs, img, 
+                     show=not noshow_img, save=save_img, save_path=save_path)
 
-    print('predict finished.')
+    print('Prediction is finished.')
 
     return objs
 
 
-def VideoDetect(video_path, label_dict, save_video=False, auto_label=False,
+def VideoDetect(video_path, label_dict, 
+                save_video=False, auto_label=False, skip_nolabel=False,
                 resize=1.0, exclude_objs='background', autolabel_dir='images'):
 
     fourcc = cv2.VideoWriter_fourcc(*'XVID')
@@ -134,9 +146,9 @@ def VideoDetect(video_path, label_dict, save_video=False, auto_label=False,
 
             YoloObj.AutoLabeling(frame, new_objs, label_dict, 
                                  autolabel_dir + '/frame{:05d}.jpg'.format(ii),
-                                 autolabel_dir + '/frame{:05d}.txt'.format(ii)
+                                 autolabel_dir + '/frame{:05d}.txt'.format(ii),
+                                 skip_nolabel=args.skip_nolabel
                                 )
-
 
         img = YoloObj.DrawBBox(new_objs, frame, show=False, save=False)
 
@@ -150,7 +162,7 @@ def VideoDetect(video_path, label_dict, save_video=False, auto_label=False,
         if k == 27 or k== ord('q'):
             break
 
-    print('predict finished.')
+    print('Prediction is finished.')
 
     cap.release()
     cv2.destroyAllWindows()
@@ -161,13 +173,15 @@ if __name__ == '__main__':
         VideoDetect(args.video_path, label_dict, 
                     save_video=args.save_video,
                     auto_label=args.auto_label,
-                    resize=0.5, 
-                    exclude_objs='background', 
+                    skip_nolabel=args.skip_nolabel,
+                    resize=args.resize, 
+                    exclude_objs=args.exclude_objs, 
                     autolabel_dir='images')
 
     elif args.subparsers == 'img_detect':
         ImgDetect(args.img_path, net, meta, darknet_data,
-                  save_path='./test_pic.jpg', show_img=False, save_img=True)
+                  save_path='./test_pic.jpg', 
+                  noshow_img=args.noshow_img, save_img=args.save_img)
 
     else:
         print('Nothing to do.')

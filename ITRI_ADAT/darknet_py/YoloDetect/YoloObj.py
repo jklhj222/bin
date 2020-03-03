@@ -145,6 +145,7 @@ def DrawBBox(objs, img, show=True,
         img = cv2.resize(img, (height, width))
 
     if save == True: 
+        print('test', save_path)
         cv2.imwrite(save_path, img)
 
     if show == True:
@@ -155,28 +156,34 @@ def DrawBBox(objs, img, show=True,
     return img
 
 
-def AutoLabeling(img, objs, label_dict, img_path, label_path):
+def AutoLabeling(img, objs, label_dict, 
+                 img_path, label_path, skip_nolabel=False):
     # label_dict: {b'object1': 0, b'object2': 1, ...}
+    # skip_nolabel == True : don't generate labels and images which detect nothing
 
-    height, width, channel = img.shape    
+    if len(objs) == 0 and skip_nolabel:
+        print('skip no label.')
+        pass
 
-    with open(label_path, 'w') as f:
-        if len(objs) == 0:
-            cv2.imwrite(img_path, img)
-
-        else:
-            for obj in objs:
-                cx = obj.cx / width
-                cy = obj.cy / height
-
-                w = obj.w / width
-                h = obj.h / height
-
+    else:
+        height, width, channel = img.shape    
+        
+        with open(label_path, 'w') as f:
+            if len(objs) == 0:
                 cv2.imwrite(img_path, img)
-
-                idx = label_dict[bytes(obj.name, encoding='utf8')]
-
-                f.write('{} {} {} {} {}'.format(idx, cx, cy, w, h))
-
+        
+            else:
+                for obj in objs:
+                    cx = obj.cx / width
+                    cy = obj.cy / height
+        
+                    w = obj.w / width
+                    h = obj.h / height
+        
+                    cv2.imwrite(img_path, img)
+        
+                    idx = label_dict[bytes(obj.name, encoding='utf8')]
+ 
+                    f.write('{} {} {} {} {}'.format(idx, cx, cy, w, h))
 
  
