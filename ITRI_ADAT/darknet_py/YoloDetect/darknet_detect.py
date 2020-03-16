@@ -74,6 +74,9 @@ net = DFUNC.load_net(bytes(darknet_cfg, 'utf-8'),
                      bytes(darknet_weights, 'utf-8'), 0)
 meta = DFUNC.load_meta(bytes(darknet_data, 'utf-8'))
 
+filename = os.path.basename(args.video_path)
+dirname = os.path.basename(os.path.dirname(args.video_path))
+
 label_dict = {}
 for idx in range(meta.classes):
     label_dict[meta.names[idx]] = idx
@@ -156,7 +159,8 @@ def VideoDetect(video_path, label_dict,
         if save_video:
             out.write(img)
 
-        cv2.imshow('frame', img)
+#        cv2.imshow(dirname + '/' + filename, img)
+        cv2.imshow(args.video_path, img)
 
         k = cv2.waitKey(1) & 0xFF
 
