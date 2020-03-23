@@ -147,8 +147,8 @@ def vaticXMLtoYOLO(data_dir=data_dir):
     xml_name = 'data_vatic/output.xml'
 
     # make labels directory
-    if not os.path.exists(data_dir + '/labels'):
-        os.makedirs(data_dir + '/labels')
+#    if not os.path.exists(data_dir + '/labels'):
+#        os.makedirs(data_dir + '/labels')
 
     # check the resolution in vatic
     height, width = cv2.imread('data_vatic/frames_in/0/0/0.jpg').shape[0:2]
@@ -188,8 +188,10 @@ def vaticXMLtoYOLO(data_dir=data_dir):
 
                     image_name = data_dir + \
                                  '/images/frame{:05d}.jpg'.format(frame_number)
+#                    label_file = data_dir + \
+#                                 '/labels/frame{:05d}.txt'.format(frame_number)
                     label_file = data_dir + \
-                                 '/labels/frame{:05d}.txt'.format(frame_number)
+                                 '/images/frame{:05d}.txt'.format(frame_number)
                                  
                     if not os.path.isfile(image_name):
                         print("the image {} doesn't exist.".format(image_name))
