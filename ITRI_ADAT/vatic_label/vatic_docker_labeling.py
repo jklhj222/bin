@@ -225,17 +225,18 @@ def vaticXMLtoYOLO(data_dir=data_dir):
                                  str(yh) + ' \n' )
     
     # touch the files that without bounding boxes
-    imagenames = glob(data_dir + '/images/*')
+    imagenames = glob(data_dir + '/images/*.jpg')
     
     textnames = []
     for imagename in imagenames:
         filename = imagename.strip('.jpg').split('/')[-1]
         
         textname = filename + '.txt'
+#        textnames.append( data_dir + '/labels/' + textname)
+        textnames.append( data_dir + '/images/' + textname)
         
-        textnames.append( data_dir + '/labels/' + textname)
-        
-        call(['touch', data_dir + '/labels/' + textname])
+#        call(['touch', data_dir + '/labels/' + textname])
+        call(['touch', data_dir + '/images/' + textname])
 
     shutil.copy('data_vatic/output.xml', data_dir + '/')
 
