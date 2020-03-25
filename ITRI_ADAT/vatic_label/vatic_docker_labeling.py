@@ -264,8 +264,10 @@ def yolo_xymm(bbox_yolo):#,size):
 
 def check_labels(data_dir=data_dir):
     # check consistency
-    txt_list = glob(data_dir + '/labels/*')
-    img_list = glob(data_dir + '/images/*')
+#    txt_list = glob(data_dir + '/labels/*.txt')
+    txt_list = glob(data_dir + '/images/*.txt')
+    img_list = glob(data_dir + '/images/*.jpg')
+    print(len(txt_list), len(img_list))
     txt_list.sort()
     img_list.sort()
     
