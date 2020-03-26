@@ -17,6 +17,7 @@ class DetectedObj():
 
         self.cx = int(result[2][0])
         self.cy = int(result[2][1])
+        print('cx, cy: ', self.cx, self.cy)
         self.l = self.bbox[0]
         self.r = self.bbox[1]
         self.t = self.bbox[2]
@@ -183,6 +184,6 @@ def AutoLabeling(img, objs, label_dict,
         
                     idx = label_dict[bytes(obj.name, encoding='utf8')]
  
-                    f.write('{} {} {} {} {}'.format(idx, cx, cy, w, h))
+                    f.write('{} {} {} {} {}\n'.format(idx, cx, cy, w, h))
 
  
