@@ -14,9 +14,11 @@ import numpy as np
 parser = argparse.ArgumentParser()
 
 # global parameters
-parser.add_argument('--yolo_size', default=416)
+parser.add_argument('--yolo_size', default=416, help='default: 416')
 
-parser.add_argument('--n_clusters', default=3)
+parser.add_argument('--n_clusters', default=3, help='default: 3')
+
+parser.add_argument('--img_type', default='jpg', help='default: jpg')
 
 subparsers = parser.add_subparsers(dest='subparsers', help='from_dir, from_train_file')
 
@@ -34,7 +36,7 @@ parser_file.add_argument('--train_file')
 args = parser.parse_args()
 
 if args.subparsers == 'from_dir':
-    imgs = glob.glob(os.path.join(args.img_dir, '*.jpg'))
+    imgs = glob.glob(os.path.join(args.img_dir, '*.' + args.img_type))
     labels = glob.glob(os.path.join(args.label_dir, '*.txt'))
 
 if args.subparsers == 'from_train_file':
@@ -43,7 +45,7 @@ if args.subparsers == 'from_train_file':
 
         imgs = list(map(lambda x: x.replace('\n', ''), imgs))
 
-        labels = list(map(lambda x: x.split('.jpg')[0] + '.txt', imgs))
+        labels = list(map(lambda x: x.split('.' + args.img_type)[0] + '.txt', imgs))
 
 print('imgs: ', len(imgs), len(labels))
 
@@ -81,7 +83,7 @@ for img, label in zip(imgs, labels):
 boxes = np.array(boxes)
 #print(boxes, type(boxes), boxes.shape)
 
-kmeans = KMeans(n_clusters=args.n_clusters)
+kmeans = KMeans(n_clusters=int(args.n_clusters))
 kmeans_fit = kmeans.fit(boxes)
 
 label_group = kmeans_fit.labels_
@@ -97,10 +99,16 @@ print('test: ', kmeans_fit.labels_, kmeans_fit.labels_.shape)
 print()
 
 grps = []
-for idx_grp in range(args.n_clusters):
+for idx_grp in range(int(args.n_clusters)):
     grps.append(boxes[label_group==idx_grp])
 
-    print('Group', idx_grp, ':', np.mean(grps[idx_grp], axis=0), boxes[label_group==idx_grp].shape)
+    print('Group {}: {} {:.2f} {}'.format(idx_grp, 
+                                        np.mean(grps[idx_grp], axis=0),
+                                        np.mean(np.mean(grps[idx_grp], axis=0)),
+                                        boxes[label_group==idx_grp].shape))
+#    print('Group', idx_grp, ':', np.mean(grps[idx_grp], axis=0), 
+#                                 np.mean(np.mean(grps[idx_grp], axis=0)),
+#                                 boxes[label_group==idx_grp].shape)
 #print(np.mean(grps[0], axis=0), 
 #      np.mean(grps[1], axis=0), 
 #      np.mean(grps[2], axis=0))
