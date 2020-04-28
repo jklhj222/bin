@@ -35,8 +35,11 @@ parser_file.add_argument('--train_file')
 
 args = parser.parse_args()
 
+if 
+
 if args.subparsers == 'from_dir':
-    imgs = glob.glob(os.path.join(args.img_dir, '*.' + args.img_type))
+#    imgs = glob.glob(os.path.join(args.img_dir, '*.' + args.img_type))
+    imgs = glob.glob(os.path.join(args.img_dir, '*')
     labels = glob.glob(os.path.join(args.label_dir, '*.txt'))
 
 if args.subparsers == 'from_train_file':
@@ -45,7 +48,18 @@ if args.subparsers == 'from_train_file':
 
         imgs = list(map(lambda x: x.replace('\n', ''), imgs))
 
-        labels = list(map(lambda x: x.split('.' + args.img_type)[0] + '.txt', imgs))
+        labels = []
+        for img in imgs:
+            if img.endswith('.jpg'):
+                labels.append(img.split('.jpg')[0] + '.txt')
+
+            elif img.endswith('.jpeg'):
+                labels.append(img.split('.jpeg')[0] + '.txt')
+
+            elif img.endswith('.png'):
+                labels.append(img.split('.png')[0] + '.txt')
+
+#        labels = list(map(lambda x: x.split('.' + args.img_type)[0] + '.txt', imgs))
 
 print('imgs: ', len(imgs), len(labels))
 
