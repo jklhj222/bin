@@ -111,6 +111,7 @@ print('test: ', kmeans_fit.labels_, kmeans_fit.labels_.shape)
 print()
 
 grps = []
+grps_dict = {}
 for idx_grp in range(int(args.n_clusters)):
     grps.append(boxes[label_group==idx_grp])
 
@@ -118,6 +119,17 @@ for idx_grp in range(int(args.n_clusters)):
                                         np.mean(grps[idx_grp], axis=0),
                                         np.mean(np.mean(grps[idx_grp], axis=0)),
                                         boxes[label_group==idx_grp].shape))
+
+    grps_dict['Group_{}'.format(idx_grp)] =  ( np.mean(grps[idx_grp], axis=0),
+                                               np.mean(np.mean(grps[idx_grp], axis=0)),
+                                               boxes[label_group==idx_grp].shape )
+
+    grps_tuple = sorted(grps_dict.items(), key=lambda x: x[1][1])
+
+for grps in grps_tuple:
+    print(grps)
+
+
 #    print('Group', idx_grp, ':', np.mean(grps[idx_grp], axis=0), 
 #                                 np.mean(np.mean(grps[idx_grp], axis=0)),
 #                                 boxes[label_group==idx_grp].shape)
