@@ -37,7 +37,7 @@ args = parser.parse_args()
 
 if args.subparsers == 'from_dir':
 #    imgs = glob.glob(os.path.join(args.img_dir, '*.' + args.img_type))
-    imgs = glob.glob(os.path.join(args.img_dir, '*')
+    imgs = glob.glob(os.path.join(args.img_dir, '*'))
     labels = glob.glob(os.path.join(args.label_dir, '*.txt'))
 
 if args.subparsers == 'from_train_file':
