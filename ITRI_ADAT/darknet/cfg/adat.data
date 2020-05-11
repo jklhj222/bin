@@ -1,4 +1,4 @@
-classes=2
+classes=num_class
 train  = data/train.txt
 valid  = data/val.txt
 names = data/adat.names

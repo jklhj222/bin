@@ -21,4 +21,3 @@ sed -i 's/num_class/'"$num_class"'/g' cfg/adat.data
 
 sed -i 's/num_class/'"$num_class"'/g' cfg/yolov3_test.cfg
 sed -i 's/num_filters/'"$filters"'/g' cfg/yolov3_test.cfg
-sed -i 's/num_class/'"$num_class"'/g' cfg/adat.data
