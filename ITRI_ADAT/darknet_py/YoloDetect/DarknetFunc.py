@@ -52,8 +52,8 @@ def detect(net, meta, image, thresh=.5, hier_thresh=.5, nms=.45):
                 b = dets[j].bbox
                 res.append((meta.names[i], dets[j].prob[i], (b.x, b.y, b.w, b.h)))
     res = sorted(res, key=lambda x: -x[1])
-#    free_image(im)
-#    free_detections(dets, num)
+    free_image(im)
+    free_detections(dets, num)
     return res
 
 def array_to_image(arr):
