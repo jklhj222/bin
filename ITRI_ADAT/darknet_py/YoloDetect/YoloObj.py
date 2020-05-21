@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """ Created on Wed Jan 23 16:03:43 2019 @author: jklhj """
-from math import ceil
+from math import ceil, sqrt
 import sys 
 import cv2 
 
@@ -17,7 +17,6 @@ class DetectedObj():
 
         self.cx = int(result[2][0])
         self.cy = int(result[2][1])
-        print('cx, cy: ', self.cx, self.cy)
         self.l = self.bbox[0]
         self.r = self.bbox[1]
         self.t = self.bbox[2]
@@ -184,6 +183,35 @@ def AutoLabeling(img, objs, label_dict,
         
                     idx = label_dict[bytes(obj.name, encoding='utf8')]
  
-                    f.write('{} {} {} {} {}\n'.format(idx, cx, cy, w, h))
+                    f.write('{} {} {} {} {}'.format(idx, cx, cy, w, h))
 
- 
+
+# direction = "right" or "left"
+def ObjFlowNum(cur_objs, pre_objs, direction, baseline):
+    direction = 1 if direction=="right" else -1
+
+    obj_pairs = []
+    for cur_obj in cur_objs:
+        dists = []
+        for pre_obj in pre_objs:
+            dist = sqrt( (cur_obj.cx - pre_obj.cx)**2 + 
+                              (cur_obj.cy - pre_obj.cy)**2 )
+
+            dists.append(dist)
+
+        obj_pairs.append( (cur_obj, pre_objs[ dists.index(min(dists)) ]) )
+
+    print('obj_pairs: ', len(obj_pairs), baseline)
+    num_obj = 0
+    for obj_pair in obj_pairs:
+        print('obj_pair[0].cx: ', obj_pair[0].cx, obj_pair[1].cx)
+        if (obj_pair[0].cx - baseline) * direction > 0 and \
+                          (baseline - obj_pair[1].cx) * direction > 0:
+            num_obj += 1
+
+    return num_obj
+
+
+
+
+

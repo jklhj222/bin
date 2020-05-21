@@ -145,8 +145,10 @@ def VideoDetect(video_path, label_dict,
 #        for obj in new_objs:
 #            print('obj: ', obj.name, obj.conf)
 
+        baseline = width*0.1
+
         if ii > 1:
-            num_objs = YoloObj.ObjFlowNum(new_objs, pre_objs, "left", width/2)
+            num_objs = YoloObj.ObjFlowNum(new_objs, pre_objs, "left", baseline)
             print('num_objs: ', num_objs)
             
             total_num_objs += num_objs
@@ -163,7 +165,7 @@ def VideoDetect(video_path, label_dict,
                                 )
 
         img = YoloObj.DrawBBox(new_objs, frame, show=False, save=False)
-        cv2.line(img, (int(width/2), 0), (int(width/2), height), (0,0,255), 5)
+        cv2.line(img, (int(baseline), 0), (int(baseline), height), (0,0,255), 5)
         cv2.putText(img, 'Object detected: ' + str(total_num_objs), (int(width*0.7), int(height*0.1)), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0,0,255), 2)
 
         if save_video:
