@@ -35,6 +35,10 @@ parser.add_argument('--check_labels',
                     default=False,
                     action='store_true')
 
+parser.add_argument('--check_delay',
+                    help='time delay when checking. Default=1 ms',
+                    default=1)
+
 parser.add_argument('--check_labels_only',
                     help='set to check the results only. Default=False',
                     default=False,
@@ -283,7 +287,7 @@ def check_labels(data_dir=data_dir):
             sys.exit()
 
     # show the images with bounding boxes
-    time_interval = 1
+    time_interval = int(args.check_delay)
     allshow = 0
     
     for i, j in enumerate(zipped):
@@ -310,12 +314,19 @@ def check_labels(data_dir=data_dir):
                 xmax = int( xmax*img_width )
                 ymin = int( ymin*img_height )
                 ymax = int( ymax*img_height )
+
                 cv2.rectangle(img, (xmin, ymin), (xmax, ymax), (0, 0, 255), 5)
+                cv2.line(img, (xmin, ymin), (xmax, ymax), (0, 0, 255), 5)
+                cv2.line(img, (xmax, ymin), (xmin, ymax), (0, 0, 255), 5)
+                cv2.circle(img, (int((xmax+xmin)/2.0), int((ymax+ymin)/2.0)), 15, (0, 255, 0), -1)
+
                 font = cv2.FONT_HERSHEY_SIMPLEX
                 cv2.putText(img, category, (xmin, ymin), font, 
                             1, (255, 255, 255), 2, cv2.LINE_AA)
             
             print('{:d}/{:d}'.format(i, len(zipped)),  img_width, img_height)
+
+            
             cv2.imshow('Image', 
                        cv2.resize(img, 
                                   (int(img_width*0.6), int(img_height*0.6))))
