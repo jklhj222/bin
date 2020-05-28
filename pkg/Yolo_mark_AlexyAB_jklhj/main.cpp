@@ -743,6 +743,12 @@ int main(int argc, char *argv[])
                                              Point2i(min(x_start, x_end), max(y_start, y_end)),
                                              Scalar(150, 200, 150));
 
+                                        circle(frame,
+                                               Point2i((int)(x_start+x_end)/2, (int)(y_start+y_end)/2),
+                                               5,
+                                               Scalar(150, 200, 150),
+                                               -1);
+
 					if (show_mark_class)
 					{
 						putText(frame, std::to_string(current_obj_id) + current_synset_name,
@@ -846,6 +852,11 @@ int main(int argc, char *argv[])
                                 line(full_image_roi, Point(xmin, ymin), Point(xmax, ymax), color_rect, mark_line_width);
                                 line(full_image_roi, Point(xmax, ymin), Point(xmin, ymax), color_rect, mark_line_width);
 
+                                circle(full_image_roi,
+                                       Point((int)(xmin+xmax)/2, (int)(ymin+ymax)/2),
+                                       10,
+                                       color_rect,
+                                       -1);
 			}
             
             // remove selected rect
