@@ -74,8 +74,8 @@ net = DFUNC.load_net(bytes(darknet_cfg, 'utf-8'),
                      bytes(darknet_weights, 'utf-8'), 0)
 meta = DFUNC.load_meta(bytes(darknet_data, 'utf-8'))
 
-filename = os.path.basename(args.video_path)
-dirname = os.path.basename(os.path.dirname(args.video_path))
+#filename = os.path.basename(args.video_path)
+#dirname = os.path.basename(os.path.dirname(args.video_path))
 
 label_dict = {}
 for idx in range(meta.classes):
@@ -97,10 +97,50 @@ def ImgDetect(img_path, net, meta, darknet_data, save_path='./',
         obj = YoloObj.DetectedObj(result)
         objs.append(obj)
 
-    for obj in objs:
-        print(obj.obj_string, obj.cx, obj.cy)
+    if len(objs) > 0:
+        max_conf_obj = objs[0]
+        for obj in objs:
+            print(obj.obj_string, obj.cx, obj.cy)
+
+            if obj.conf > max_conf_obj.conf:
+                max_conf_obj = obj 
+
+        max_conf_obj_id = label_dict[bytes(max_conf_obj.name, encoding='utf-8')]
 
     print('Number of objects: ', len(objs), '\n')
+
+    temp_img = cv2.imread('C_1200M.jpg')
+    
+    # template image real size (height, width) in minimeter
+    temp_realsize_mm = (340, 355)
+
+    # camera FOV (height, width) in degree
+    cam_fov_deg = (50.0, 64.8)
+
+    objs_coord = []
+    with open('C_1200M.txt', 'r') as temp_txt:
+        temp_coords = temp_txt.readlines()
+  
+        for temp_coord in temp_coords:
+            coord = temp_coord.strip('\n').split()
+            
+            objs_coord.append( (float(coord[1]), 
+                                float(coord[2]), 
+                                float(coord[3]), 
+                                float(coord[4])) )
+
+    print('objs_coord: ', objs_coord, max_conf_obj_id, type(max_conf_obj_id))
+    print('objs_coord[max_conf_obj_id]: ', objs_coord[max_conf_obj_id])
+
+    position = YoloObj.PosMapping(max_conf_obj, 
+                                  img.shape, 
+                                  cam_fov_deg,
+                                  temp_realsize_mm,
+                                  temp_img.shape,
+                                  label_dict,
+                                  objs_coord[max_conf_obj_id])
+
+    print('position: ', position)
 
     YoloObj.DrawBBox(objs, img, 
                      show=not noshow_img, save=save_img, save_path=save_path)

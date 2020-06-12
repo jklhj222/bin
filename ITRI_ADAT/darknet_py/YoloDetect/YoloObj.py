@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """ Created on Wed Jan 23 16:03:43 2019 @author: jklhj """
-from math import ceil, sqrt
+from math import ceil, sqrt, pi, sin, pow
 import sys 
 import cv2 
 
@@ -129,8 +129,13 @@ def DrawBBox(objs, img, show=True,
     for obj in objs:
         cv2.rectangle(img, (obj.l, obj.t), (obj.r, obj.b), (0, 255, 0), 5)
        
+        cv2.line(img, (obj.l, obj.t), (obj.r, obj.b), (0, 255, 0), 5)
+        cv2.line(img, (obj.r, obj.t), (obj.l, obj.b), (0, 255, 0), 5)
+
+        cv2.circle(img, (obj.cx, obj.cy), 15, (0, 255, 0), -1)
+
         image = cv2.putText(img,
-                            obj.name + str(obj.conf),
+                            'class: ' + obj.name + '_conf: ' + str(obj.conf),
                             (obj.l, obj.t-10), 
                             cv2.FONT_HERSHEY_TRIPLEX, 
                             0.5, 
@@ -212,6 +217,75 @@ def ObjFlowNum(cur_objs, pre_objs, direction, baseline):
     return num_obj
 
 
+def PosMapping(obj, tgt_shape, cam_fov_deg, temp_realsize, temp_shape, label_dict, temp_obj_coord):
+    # obj: reference object
+    # tgt_shape: target (local) image shape, (height, width)
+    # cam_fov_deg: camera FOV in degree (vertical, horizontal)
+    # temp_realsize: real size of template image in mm or cm (height, width)
+    # temp_shape: resolution of template image in pixel (height, width)
+    # label_dict: {b'object1': 0, b'object2': 1, ...}
+    # temp_obj_coord: the coordinate of the reference object in yolo format, 
+    #                 ex: ('0.190625', '0.161111', '0.171875', '0.272222')
+
+    # imformations of reference object
+    obj_id = label_dict[bytes(obj.name, encoding='utf-8')]
+    obj_cx = obj.cx
+    obj_cy = obj.cy
+    obj_w = obj.w
+    obj_h = obj.h
+
+    # imformations of template image
+    temp_cx = int(temp_shape[1]/2)
+    temp_cy = int(temp_shape[0]/2)
+    temp_w = temp_shape[1]
+    temp_h = temp_shape[0]
+    temp_real_w = temp_realsize[1]
+    temp_real_h = temp_realsize[0]
+
+    # imformations of object in template image
+    temp_obj_cx = int(temp_obj_coord[0] * temp_w)
+    temp_obj_cy = int(temp_obj_coord[1] * temp_h)
+    temp_obj_w = int(temp_obj_coord[2] * temp_w) 
+    temp_obj_h = int(temp_obj_coord[3] * temp_h) 
+    temp_obj_real_w = temp_obj_coord[2] * temp_real_w 
+    temp_obj_real_h = temp_obj_coord[3] * temp_real_h 
+
+    # ratio between target image and template image
+    w_ratio = temp_obj_w / obj_w
+    h_ratio = temp_obj_h / obj_h
+
+    # FOV of the camera
+    fov_w_deg = cam_fov_deg[1]
+    fov_h_deg = cam_fov_deg[0]
+    fov_w_rad = fov_w_deg * (pi/180.0) 
+    fov_h_rad = fov_h_deg * (pi/180.0)
+
+    # imformations of target image
+    tgt_w = tgt_shape[1] 
+    tgt_h = tgt_shape[0]
+    tgt_cx = int(tgt_w/2)
+    tgt_cy = int(tgt_h/2)
+    tgt_real_w = temp_obj_real_w * (tgt_w / obj_w)
+    tgt_real_h = temp_obj_real_h * (tgt_h / obj_h)
+
+    # relative position between the center of reference object and target image
+    shift_vec = (tgt_cx-obj_cx, tgt_cy-obj_cy)
+    print()
+    print('obj_id: ', obj_id, 'conf: ', obj.conf)
+    print('shift_vec: ', shift_vec)
+
+    hypotenuse_w = (tgt_real_w / sin(fov_w_rad)) * sin((pi-fov_w_rad)/2.0)
+    hypotenuse_h = (tgt_real_h / sin(fov_h_rad)) * sin((pi-fov_h_rad)/2.0)
+    
+    cam_height = sqrt( pow(hypotenuse_w, 2.0) - pow(tgt_real_w/2.0, 2.0) )
+#    cam_height = sqrt( pow(hypotenuse_h, 2.0) - pow(tgt_real_h/2.0, 2.0) )
 
 
+    position = ( temp_obj_cx + shift_vec[0] * w_ratio,
+                 temp_obj_cy + shift_vec[1] * h_ratio,
+                 cam_height )
 
+    print()
+    print('position: ', position)
+
+    return position
