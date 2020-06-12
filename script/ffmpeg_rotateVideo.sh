@@ -5,4 +5,4 @@
 #3 = 90 Clockwise and Vertical Flip
 
 
-ffmpeg -i INPUT.mov -vf "transpose=1" OUTPUT.mov
+ffmpeg -i INPUT.mov -vf "transpose=1" -strict -2  OUTPUT.mov
