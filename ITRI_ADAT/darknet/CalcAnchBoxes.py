@@ -72,8 +72,8 @@ boxes = []
 for img, label in zip(imgs, labels):
     height, width, channel = cv2.imread(img).shape
 
-    resize_ratio_w = width / args.yolo_size
-    resize_ratio_h = height / args.yolo_size
+    resize_ratio_w = width / int(args.yolo_size)
+    resize_ratio_h = height / int(args.yolo_size)
 
     with open(label) as f:
         objs = f.readlines()
@@ -126,10 +126,19 @@ for idx_grp in range(int(args.n_clusters)):
 
     grps_tuple = sorted(grps_dict.items(), key=lambda x: x[1][1])
 
-for grps in grps_tuple:
-    print(grps)
+print()
+abox_string = ''
+for idx, grps in enumerate(grps_tuple):
+    print(grps, grps[1][0][0], )
+   
+    if idx != len(grps_tuple)-1:
+        abox_string += str(int(grps[1][0][0])) + ',' + str(int(grps[1][0][1])) + ', '
+    else:
+        abox_string += str(int(grps[1][0][0])) + ',' + str(int(grps[1][0][1])) 
+       
 
-
+print()
+print('yolo anchor boxes ({} boxes): \n{}'.format(len(grps_tuple) , abox_string))
 #    print('Group', idx_grp, ':', np.mean(grps[idx_grp], axis=0), 
 #                                 np.mean(np.mean(grps[idx_grp], axis=0)),
 #                                 boxes[label_group==idx_grp].shape)
