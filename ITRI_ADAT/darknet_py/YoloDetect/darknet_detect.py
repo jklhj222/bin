@@ -8,6 +8,7 @@ import DarknetFunc as DFUNC
 import YoloObj
 import cv2
 import os
+import copy
 
 parser = argparse.ArgumentParser()
 
@@ -66,6 +67,10 @@ config.read(cfg_file)
 darknet_cfg = config['DARKNET']['CFG']
 darknet_weights = config['DARKNET']['WEIGHTS']
 darknet_data = config['DARKNET']['DATA_FILE']
+temp_img_file = config['DARKNET']['TEMP_IMG']
+temp_real_size = eval(config['DARKNET']['TEMP_REAL_SIZE'])
+temp_objs_coord_file = config['DARKNET']['TEMP_OBJS_COORD']
+cam_fov = eval(config['DARKNET']['CAM_FOV'])
 
 os.environ['CUDA_VISIBLE_DEVICES'] = args.gpu_idx
 print(os.environ['CUDA_VISIBLE_DEVICES'])
@@ -89,6 +94,14 @@ def ImgDetect(img_path, net, meta, darknet_data, save_path='./',
 
     img = cv2.imread(img_path)
 
+    central_ratio = 0.7
+    img_central_area = ( (int(img.shape[1]*(1-central_ratio)/2), 
+                          int(img.shape[0]*(1-central_ratio)/2)),
+                         (int(img.shape[1]*(1-(1-central_ratio)/2)), 
+                          int(img.shape[0]*(1-(1-central_ratio)/2))) )
+
+    print('img_central_area: ', img.shape, img_central_area)
+
     results = DFUNC.detect(net, meta, bytes(img_path, encoding='utf-8'),
                            thresh=float(args.thresh))
 
@@ -97,28 +110,41 @@ def ImgDetect(img_path, net, meta, darknet_data, save_path='./',
         obj = YoloObj.DetectedObj(result)
         objs.append(obj)
 
+    # for PosMapping()
     if len(objs) > 0:
-        max_conf_obj = objs[0]
-        for obj in objs:
-            print(obj.obj_string, obj.cx, obj.cy)
+        objs = sorted(objs, key=lambda x: x.conf, reverse=True)
 
-            if obj.conf > max_conf_obj.conf:
-                max_conf_obj = obj 
+        objs = [obj for obj in objs if obj.name != '13']
+        objs = [obj for obj in objs if obj.cx >= img_central_area[0][0] and obj.cy >= img_central_area[0][1]]
+        objs = [obj for obj in objs if obj.cx <= img_central_area[1][0] and obj.cy <= img_central_area[1][1]]
+
+        max_conf_obj = objs[0]
 
         max_conf_obj_id = label_dict[bytes(max_conf_obj.name, encoding='utf-8')]
 
+    # for CalcOrient()
+    if len(objs) > 1:
+        max_two_conf_objs = (objs[0], objs[1])
+
+        max_two_conf_objs_id = (label_dict[bytes(max_two_conf_objs[0].name, encoding='utf-8')],
+                                label_dict[bytes(max_two_conf_objs[1].name, encoding='utf-8')])
+
     print('Number of objects: ', len(objs), '\n')
 
-    temp_img = cv2.imread('C_1200M.jpg')
+#    temp_img = cv2.imread('C_1200M.jpg')
+    temp_img = cv2.imread(temp_img_file)
     
     # template image real size (height, width) in minimeter
-    temp_realsize_mm = (340, 355)
+#    temp_realsize_mm = (340, 355)
+    temp_realsize_mm = temp_real_size
 
-    # camera FOV (height, width) in degree
-    cam_fov_deg = (50.0, 64.8)
+    # camera FOV (vertical, horizontal) in degree
+#    cam_fov_deg = (50.0, 64.8)
+    cam_fov_deg = cam_fov
 
     objs_coord = []
-    with open('C_1200M.txt', 'r') as temp_txt:
+#    with open('C_1200M.txt', 'r') as temp_txt:
+    with open(temp_objs_coord_file, 'r') as temp_txt:
         temp_coords = temp_txt.readlines()
   
         for temp_coord in temp_coords:
@@ -129,23 +155,78 @@ def ImgDetect(img_path, net, meta, darknet_data, save_path='./',
                                 float(coord[3]), 
                                 float(coord[4])) )
 
-    print('objs_coord: ', objs_coord, max_conf_obj_id, type(max_conf_obj_id))
-    print('objs_coord[max_conf_obj_id]: ', objs_coord[max_conf_obj_id])
+    if len(objs) > 1:
+        two_temp_objs_coord = (objs_coord[max_two_conf_objs_id[0]],
+                               objs_coord[max_two_conf_objs_id[1]])
 
-    position = YoloObj.PosMapping(max_conf_obj, 
-                                  img.shape, 
-                                  cam_fov_deg,
-                                  temp_realsize_mm,
-                                  temp_img.shape,
-                                  label_dict,
-                                  objs_coord[max_conf_obj_id])
+        angle = YoloObj.CalcOrient(max_two_conf_objs, 
+                                   max_two_conf_objs_id,
+                                   temp_img.shape,
+                                   two_temp_objs_coord)
 
-    print('position: ', position)
+        print('angle: ', angle)
 
-    YoloObj.DrawBBox(objs, img, 
-                     show=not noshow_img, save=save_img, save_path=save_path)
+    if len(objs) > 0:
+        print('objs_coord: ', objs_coord, max_conf_obj_id, type(max_conf_obj_id))
+        print('objs_coord[max_conf_obj_id]: ', objs_coord[max_conf_obj_id])
 
-    return objs
+        xy_position_pixel, position_real = \
+            YoloObj.PosMapping(max_conf_obj, 
+                               img.shape, 
+                               cam_fov_deg,
+                               temp_realsize_mm,
+                               temp_img.shape,
+                               label_dict,
+                               objs_coord[max_conf_obj_id])
+
+        print('position: ', xy_position_pixel, position_real)
+
+    # show information about camera position
+    if len(objs) < 1:
+        position_display = 'Unknown'
+        position_str = 'Cam (X,Y,Z): {}'
+    elif len(objs) > 0:
+       position_display = str(tuple(map(int, list(position_real))))
+       position_str = 'Cam (X,Y,Z): {} mm'
+
+#    YoloObj.DrawBBox(objs, img)
+
+    cv2.putText(img,
+                position_str.format(position_display),
+                (50, 50),
+                cv2.FONT_HERSHEY_TRIPLEX,
+                0.9,
+                (0, 0, 255),
+                2,
+                cv2.LINE_AA)
+
+    cv2.circle(img, (int(img.shape[1]/2), int(img.shape[0]/2)), 15, (0, 0, 255), -1)
+
+    # show informations about camera YAW
+    if len(objs) < 2: 
+        angle_display = 'Unknown'
+        angle_str = '        YAW: {}'
+    elif len(objs) > 1:
+        angle_display = angle.copy()
+        angle_str = '        YAW: {:.2f} degree'
+
+    cv2.putText(img,
+                angle_str.format(angle_display),
+                (50, 90),
+                cv2.FONT_HERSHEY_TRIPLEX,
+                0.9,
+                (0, 0, 255),
+                2,
+                cv2.LINE_AA)
+
+
+    if not noshow_img:
+        YoloObj.ShowImg(img)
+
+    if save_img:
+        YoloObj.SaveImg(img, resize_ratio=float(args.resize))
+
+    return objs, img
 
 
 def VideoDetect(video_path, label_dict, 
@@ -161,7 +242,7 @@ def VideoDetect(video_path, label_dict,
     print('fps:', fps)
 
     if save_video:
-        out = cv2.VideoWriter('output.avi', fourcc, 30.0, (width, height))
+        out = cv2.VideoWriter('output.avi', fourcc, 20.0, (width, height))
 
     ii=0
     while (cap.isOpened()):
@@ -178,7 +259,7 @@ def VideoDetect(video_path, label_dict,
 
         cv2.imwrite('tmp.jpg', frame)
  
-        objs = ImgDetect('tmp.jpg', net, meta, darknet_data)
+        objs, img = ImgDetect('tmp.jpg', net, meta, darknet_data)
 
         new_objs = [obj for obj in objs if obj.name not in exclude_objs]
         for obj in new_objs:
@@ -194,7 +275,7 @@ def VideoDetect(video_path, label_dict,
                                  skip_nolabel=args.skip_nolabel
                                 )
 
-        img = YoloObj.DrawBBox(new_objs, frame, show=False, save=False)
+#        img = YoloObj.DrawBBox(new_objs, frame, show=False, save=False)
 
         if save_video:
             out.write(img)

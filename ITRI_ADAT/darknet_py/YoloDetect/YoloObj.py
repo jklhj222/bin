@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """ Created on Wed Jan 23 16:03:43 2019 @author: jklhj """
-from math import ceil, sqrt, pi, sin, pow
+from math import ceil, sqrt, pi, sin, acos, pow
+import numpy as np
 import sys 
 import cv2 
 
@@ -123,8 +124,23 @@ def ObjsPOI(innerObj, outerObj):
     return POI 
 
 
-def DrawBBox(objs, img, show=True, 
-             save=False, save_path='./test_pic.jpg', resize_ratio=None):
+def ShowImg(img):
+    cv2.imshow('img', img)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
+
+
+def SaveImg(img, save_path='./test_pic.jpg', resize_ratio=None):
+    if resize_ratio is not None:
+        width   = int(img.shape[0] * resize_ratio)
+        height  = int(img.shape[1] * resize_ratio)
+
+        img = cv2.resize(img, (height, width))
+
+    cv2.imwrite(save_path, img)
+
+
+def DrawBBox(objs, img):
 #    import cv2
     for obj in objs:
         cv2.rectangle(img, (obj.l, obj.t), (obj.r, obj.b), (0, 255, 0), 5)
@@ -134,6 +150,8 @@ def DrawBBox(objs, img, show=True,
 
         cv2.circle(img, (obj.cx, obj.cy), 15, (0, 255, 0), -1)
 
+        cv2.circle(img, (int(img.shape[1]/2), int(img.shape[0]/2)), 15, (0, 0, 255), -1)
+
         image = cv2.putText(img,
                             'class: ' + obj.name + '_conf: ' + str(obj.conf),
                             (obj.l, obj.t-10), 
@@ -142,20 +160,6 @@ def DrawBBox(objs, img, show=True,
                             (0, 255, 0), 
                             1, 
                             cv2.LINE_AA)
-
-    if resize_ratio is not None:
-        width   = int(img.shape[0] * resize_ratio)
-        height  = int(img.shape[1] * resize_ratio)
-
-        img = cv2.resize(img, (height, width))
-
-    if save == True: 
-        cv2.imwrite(save_path, img)
-
-    if show == True:
-        cv2.imshow('img', img)
-        cv2.waitKey(0)
-        cv2.destroyAllWindows()
 
     return img
 
@@ -227,14 +231,14 @@ def PosMapping(obj, tgt_shape, cam_fov_deg, temp_realsize, temp_shape, label_dic
     # temp_obj_coord: the coordinate of the reference object in yolo format, 
     #                 ex: ('0.190625', '0.161111', '0.171875', '0.272222')
 
-    # imformations of reference object
+    # informations of reference object
     obj_id = label_dict[bytes(obj.name, encoding='utf-8')]
     obj_cx = obj.cx
     obj_cy = obj.cy
     obj_w = obj.w
     obj_h = obj.h
 
-    # imformations of template image
+    # informations of template image
     temp_cx = int(temp_shape[1]/2)
     temp_cy = int(temp_shape[0]/2)
     temp_w = temp_shape[1]
@@ -242,7 +246,7 @@ def PosMapping(obj, tgt_shape, cam_fov_deg, temp_realsize, temp_shape, label_dic
     temp_real_w = temp_realsize[1]
     temp_real_h = temp_realsize[0]
 
-    # imformations of object in template image
+    # informations of object in template image
     temp_obj_cx = int(temp_obj_coord[0] * temp_w)
     temp_obj_cy = int(temp_obj_coord[1] * temp_h)
     temp_obj_w = int(temp_obj_coord[2] * temp_w) 
@@ -260,7 +264,7 @@ def PosMapping(obj, tgt_shape, cam_fov_deg, temp_realsize, temp_shape, label_dic
     fov_w_rad = fov_w_deg * (pi/180.0) 
     fov_h_rad = fov_h_deg * (pi/180.0)
 
-    # imformations of target image
+    # informations of target image
     tgt_w = tgt_shape[1] 
     tgt_h = tgt_shape[0]
     tgt_cx = int(tgt_w/2)
@@ -268,7 +272,7 @@ def PosMapping(obj, tgt_shape, cam_fov_deg, temp_realsize, temp_shape, label_dic
     tgt_real_w = temp_obj_real_w * (tgt_w / obj_w)
     tgt_real_h = temp_obj_real_h * (tgt_h / obj_h)
 
-    # relative position between the center of reference object and target image
+    # relative position between the center of reference object and the target image
     shift_vec = (tgt_cx-obj_cx, tgt_cy-obj_cy)
     print()
     print('obj_id: ', obj_id, 'conf: ', obj.conf)
@@ -280,12 +284,51 @@ def PosMapping(obj, tgt_shape, cam_fov_deg, temp_realsize, temp_shape, label_dic
     cam_height = sqrt( pow(hypotenuse_w, 2.0) - pow(tgt_real_w/2.0, 2.0) )
 #    cam_height = sqrt( pow(hypotenuse_h, 2.0) - pow(tgt_real_h/2.0, 2.0) )
 
+    xy_position_pixel = ( temp_obj_cx + shift_vec[0] * w_ratio,
+                          temp_obj_cy + shift_vec[1] * h_ratio )
 
-    position = ( temp_obj_cx + shift_vec[0] * w_ratio,
-                 temp_obj_cy + shift_vec[1] * h_ratio,
-                 cam_height )
+    position_real = ( (xy_position_pixel[0] / temp_w) * temp_real_w,
+                      (xy_position_pixel[1] / temp_h) * temp_real_h,
+                      cam_height )
 
-    print()
-    print('position: ', position)
+#    position_real = ( ((temp_obj_cx + shift_vec[0]*w_ratio) / temp_w)*temp_real_w,
+#                      ((temp_obj_cy + shift_vec[1]*h_ratio) / temp_h)*temp_real_h,
+#                      cam_height )
 
-    return position
+    return xy_position_pixel, position_real
+
+def CalcOrient(two_objs, two_objs_id, temp_shape, two_temp_objs_coord):
+    # informations of reference object
+    obj_cx1 = two_objs[0].cx
+    obj_cy1 = two_objs[0].cy
+ 
+    obj_cx2 = two_objs[1].cx
+    obj_cy2 = two_objs[1].cy
+
+    # informations of template image and object in template image
+    temp_w = temp_shape[1]
+    temp_h = temp_shape[0]
+
+    temp_obj_cx1 = int(two_temp_objs_coord[0][0] * temp_w)
+    temp_obj_cy1 = int(two_temp_objs_coord[0][1] * temp_h)
+
+    temp_obj_cx2 = int(two_temp_objs_coord[1][0] * temp_w)
+    temp_obj_cy2 = int(two_temp_objs_coord[1][1] * temp_h)
+
+    tgt_vec = np.array([obj_cx2 - obj_cx1, obj_cy2 - obj_cy1])
+    temp_vec = np.array([temp_obj_cx2 - temp_obj_cx1, temp_obj_cy2 - temp_obj_cy1])
+
+    tgt_vec_norm = np.linalg.norm(tgt_vec)
+    temp_vec_norm = np.linalg.norm(temp_vec)
+
+    angle = np.arccos( np.dot(tgt_vec, temp_vec) / (tgt_vec_norm * temp_vec_norm)) 
+    rotation = np.cross(temp_vec, tgt_vec)
+
+    if rotation < 0:
+        angle *= -1
+
+    print('norm: ', tgt_vec_norm, temp_vec_norm)
+
+    return angle * 180.0 / pi
+
+
