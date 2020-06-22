@@ -118,16 +118,6 @@ def ImgDetect(img_path, net, meta, darknet_data, save_path='./',
         objs = [obj for obj in objs if obj.cx >= img_central_area[0][0] and obj.cy >= img_central_area[0][1]]
         objs = [obj for obj in objs if obj.cx <= img_central_area[1][0] and obj.cy <= img_central_area[1][1]]
 
-        max_conf_obj = objs[0]
-
-        max_conf_obj_id = label_dict[bytes(max_conf_obj.name, encoding='utf-8')]
-
-    # for CalcOrient()
-    if len(objs) > 1:
-        max_two_conf_objs = (objs[0], objs[1])
-
-        max_two_conf_objs_id = (label_dict[bytes(max_two_conf_objs[0].name, encoding='utf-8')],
-                                label_dict[bytes(max_two_conf_objs[1].name, encoding='utf-8')])
 
     print('Number of objects: ', len(objs), '\n')
 
@@ -155,41 +145,33 @@ def ImgDetect(img_path, net, meta, darknet_data, save_path='./',
                                 float(coord[3]), 
                                 float(coord[4])) )
 
-    if len(objs) > 1:
-        two_temp_objs_coord = (objs_coord[max_two_conf_objs_id[0]],
-                               objs_coord[max_two_conf_objs_id[1]])
+    if len(objs) >= 1:
+        cam_orient = YoloObj.CamOrient(objs,
+                                       img.shape,
+                                       cam_fov_deg,
+                                       temp_realsize_mm,
+                                       temp_img.shape,
+                                       label_dict,
+                                       objs_coord)
 
-        angle = YoloObj.CalcOrient(max_two_conf_objs, 
-                                   max_two_conf_objs_id,
-                                   temp_img.shape,
-                                   two_temp_objs_coord)
+        xy_position_pixel = cam_orient.xy_position_pixel
 
-        print('angle: ', angle)
+        position_real = cam_orient.position_real
 
-    if len(objs) > 0:
-        print('objs_coord: ', objs_coord, max_conf_obj_id, type(max_conf_obj_id))
-        print('objs_coord[max_conf_obj_id]: ', objs_coord[max_conf_obj_id])
+        yaw_deg = cam_orient.yaw_deg
 
-        xy_position_pixel, position_real = \
-            YoloObj.PosMapping(max_conf_obj, 
-                               img.shape, 
-                               cam_fov_deg,
-                               temp_realsize_mm,
-                               temp_img.shape,
-                               label_dict,
-                               objs_coord[max_conf_obj_id])
-
-        print('position: ', xy_position_pixel, position_real)
 
     # show information about camera position
-    if len(objs) < 1:
+#    if len(objs) < 1:
+    if len(objs) == 0:
         position_display = 'Unknown'
         position_str = 'Cam (X,Y,Z): {}'
-    elif len(objs) > 0:
+    elif len(objs) >= 1:
+       print('len(objs): ', len(objs), position_real)
        position_display = str(tuple(map(int, list(position_real))))
        position_str = 'Cam (X,Y,Z): {} mm'
 
-#    YoloObj.DrawBBox(objs, img)
+    YoloObj.DrawBBox(objs, img)
 
     cv2.putText(img,
                 position_str.format(position_display),
@@ -207,7 +189,7 @@ def ImgDetect(img_path, net, meta, darknet_data, save_path='./',
         angle_display = 'Unknown'
         angle_str = '        YAW: {}'
     elif len(objs) > 1:
-        angle_display = angle.copy()
+        angle_display = yaw_deg.copy()
         angle_str = '        YAW: {:.2f} degree'
 
     cv2.putText(img,
@@ -223,8 +205,8 @@ def ImgDetect(img_path, net, meta, darknet_data, save_path='./',
     if not noshow_img:
         YoloObj.ShowImg(img)
 
-    if save_img:
-        YoloObj.SaveImg(img, resize_ratio=float(args.resize))
+#    if save_img:
+    YoloObj.SaveImg(img, resize_ratio=float(args.resize))
 
     return objs, img
 

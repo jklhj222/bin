@@ -220,115 +220,162 @@ def ObjFlowNum(cur_objs, pre_objs, direction, baseline):
 
     return num_obj
 
+# compute the relative position and Yaw between camera and sample
+class CamOrient():
+    def __init__(self, objs, tgt_shape, cam_fov_deg, temp_realsize, temp_shape, label_dict, temp_objs_coord):
+        # objs: objects detected by yolo
+        # tgt_shape: target (local) image shape, (height, width)
+        # cam_fov_deg: camera FOV in degree (vertical, horizontal)
+        # temp_realsize: real size of template image in mm or cm (height, width)
+        # temp_shape: resolution of template image in pixel (height, width)
+        # label_dict: {b'object1': 0, b'object2': 1, ...}
+        # temp_objs_coord: the coordinate of the reference object in yolo format, 
+        #                 ex: ('0.190625', '0.161111', '0.171875', '0.272222')
 
-def PosMapping(obj, tgt_shape, cam_fov_deg, temp_realsize, temp_shape, label_dict, temp_obj_coord):
-    # obj: reference object
-    # tgt_shape: target (local) image shape, (height, width)
-    # cam_fov_deg: camera FOV in degree (vertical, horizontal)
-    # temp_realsize: real size of template image in mm or cm (height, width)
-    # temp_shape: resolution of template image in pixel (height, width)
-    # label_dict: {b'object1': 0, b'object2': 1, ...}
-    # temp_obj_coord: the coordinate of the reference object in yolo format, 
-    #                 ex: ('0.190625', '0.161111', '0.171875', '0.272222')
+        if len(objs) > 0:
+            self.objs = sorted(objs, key=lambda x: x.conf, reverse=True)
+        else:
+            print('there is no object be detected.')
 
-    # informations of reference object
-    obj_id = label_dict[bytes(obj.name, encoding='utf-8')]
-    obj_cx = obj.cx
-    obj_cy = obj.cy
-    obj_w = obj.w
-    obj_h = obj.h
+        self.tgt_shape = tgt_shape
+        self.cam_fov_deg = cam_fov_deg
 
-    # informations of template image
-    temp_cx = int(temp_shape[1]/2)
-    temp_cy = int(temp_shape[0]/2)
-    temp_w = temp_shape[1]
-    temp_h = temp_shape[0]
-    temp_real_w = temp_realsize[1]
-    temp_real_h = temp_realsize[0]
+        # informations of template image
+        self.temp_realsize = temp_realsize
+        self.temp_shape = temp_shape
+        self.temp_w = temp_shape[1]
+        self.temp_h = temp_shape[0]
 
-    # informations of object in template image
-    temp_obj_cx = int(temp_obj_coord[0] * temp_w)
-    temp_obj_cy = int(temp_obj_coord[1] * temp_h)
-    temp_obj_w = int(temp_obj_coord[2] * temp_w) 
-    temp_obj_h = int(temp_obj_coord[3] * temp_h) 
-    temp_obj_real_w = temp_obj_coord[2] * temp_real_w 
-    temp_obj_real_h = temp_obj_coord[3] * temp_real_h 
+        self.label_dict = label_dict
+        self.temp_objs_coord = temp_objs_coord
 
-    # ratio between target image and template image
-    w_ratio = temp_obj_w / obj_w
-    h_ratio = temp_obj_h / obj_h
+        if len(objs) >= 2:
+            self.xy_position_pixel, \
+            self.position_real, \
+            self.cam_height = self.PosMapping()
 
-    # FOV of the camera
-    fov_w_deg = cam_fov_deg[1]
-    fov_h_deg = cam_fov_deg[0]
-    fov_w_rad = fov_w_deg * (pi/180.0) 
-    fov_h_rad = fov_h_deg * (pi/180.0)
+            self.yaw_rad, self.yaw_deg = self.CalcYaw()
 
-    # informations of target image
-    tgt_w = tgt_shape[1] 
-    tgt_h = tgt_shape[0]
-    tgt_cx = int(tgt_w/2)
-    tgt_cy = int(tgt_h/2)
-    tgt_real_w = temp_obj_real_w * (tgt_w / obj_w)
-    tgt_real_h = temp_obj_real_h * (tgt_h / obj_h)
+        elif len(objs) == 1:
+            self.xy_position_pixel, \
+            self.position_real, \
+            self.cam_height = self.PosMapping()
 
-    # relative position between the center of reference object and the target image
-    shift_vec = (tgt_cx-obj_cx, tgt_cy-obj_cy)
-    print()
-    print('obj_id: ', obj_id, 'conf: ', obj.conf)
-    print('shift_vec: ', shift_vec)
+            self.yaw_rad = self.yaw_deg = None
 
-    hypotenuse_w = (tgt_real_w / sin(fov_w_rad)) * sin((pi-fov_w_rad)/2.0)
-    hypotenuse_h = (tgt_real_h / sin(fov_h_rad)) * sin((pi-fov_h_rad)/2.0)
+        elif len(objs) == 0:
+            self.xy_position_pixel = \
+            self.position_real = \
+            self.cam_height = None
+
+            self.yaw_rad = self.yaw_deg = None
+
+
+    def PosMapping(self):
+        obj = self.objs[0]
+        
+        # informations of reference object
+        obj_id = self.label_dict[bytes(obj.name, encoding='utf-8')]
+        obj_cx = obj.cx
+        obj_cy = obj.cy
+        obj_w = obj.w
+        obj_h = obj.h 
+
+        temp_obj_coord = self.temp_objs_coord[obj_id]
+
+        # informations of template image
+        temp_cx = int(self.temp_shape[1]/2)
+        temp_cy = int(self.temp_shape[0]/2)
+        temp_real_w = self.temp_realsize[1]
+        temp_real_h = self.temp_realsize[0]
+
+        # informations of object in template image
+        temp_obj_cx = int(temp_obj_coord[0] * self.temp_w)
+        temp_obj_cy = int(temp_obj_coord[1] * self.temp_h)
+        temp_obj_w = int(temp_obj_coord[2] * self.temp_w) 
+        temp_obj_h = int(temp_obj_coord[3] * self.temp_h) 
+        temp_obj_real_w = temp_obj_coord[2] * temp_real_w 
+        temp_obj_real_h = temp_obj_coord[3] * temp_real_h 
+
+        # ratio between target image and template image
+        w_ratio = temp_obj_w / obj_w
+        h_ratio = temp_obj_h / obj_h
+
+        # FOV of the camera
+        fov_w_deg = self.cam_fov_deg[1]
+        fov_h_deg = self.cam_fov_deg[0]
+        fov_w_rad = fov_w_deg * (pi/180.0) 
+        fov_h_rad = fov_h_deg * (pi/180.0)
+
+        # informations of target image
+        tgt_w = self.tgt_shape[1] 
+        tgt_h = self.tgt_shape[0]
+        tgt_cx = int(tgt_w/2)
+        tgt_cy = int(tgt_h/2)
+        tgt_real_w = temp_obj_real_w * (tgt_w / obj_w)
+        tgt_real_h = temp_obj_real_h * (tgt_h / obj_h)
+
+        # relative position between the center of reference object and the target image
+        shift_vec = (tgt_cx-obj_cx, tgt_cy-obj_cy)
+        print()
+        print('obj_id: ', obj_id, 'conf: ', obj.conf)
+        print('shift_vec: ', shift_vec)
+
+        hypotenuse_w = (tgt_real_w / sin(fov_w_rad)) * sin((pi-fov_w_rad)/2.0)
+        hypotenuse_h = (tgt_real_h / sin(fov_h_rad)) * sin((pi-fov_h_rad)/2.0)
     
-    cam_height = sqrt( pow(hypotenuse_w, 2.0) - pow(tgt_real_w/2.0, 2.0) )
-#    cam_height = sqrt( pow(hypotenuse_h, 2.0) - pow(tgt_real_h/2.0, 2.0) )
+        cam_height = sqrt( pow(hypotenuse_w, 2.0) - pow(tgt_real_w/2.0, 2.0) )
+#        cam_height = sqrt( pow(hypotenuse_h, 2.0) - pow(tgt_real_h/2.0, 2.0) )
 
-    xy_position_pixel = ( temp_obj_cx + shift_vec[0] * w_ratio,
-                          temp_obj_cy + shift_vec[1] * h_ratio )
+        xy_position_pixel = ( temp_obj_cx + shift_vec[0] * w_ratio,
+                                   temp_obj_cy + shift_vec[1] * h_ratio )
 
-    position_real = ( (xy_position_pixel[0] / temp_w) * temp_real_w,
-                      (xy_position_pixel[1] / temp_h) * temp_real_h,
-                      cam_height )
+        position_real = ( (xy_position_pixel[0] / self.temp_w) * temp_real_w,
+                               (xy_position_pixel[1] / self.temp_h) * temp_real_h,
+                               cam_height )
 
-#    position_real = ( ((temp_obj_cx + shift_vec[0]*w_ratio) / temp_w)*temp_real_w,
-#                      ((temp_obj_cy + shift_vec[1]*h_ratio) / temp_h)*temp_real_h,
-#                      cam_height )
+        return xy_position_pixel, position_real, cam_height
 
-    return xy_position_pixel, position_real
 
-def CalcOrient(two_objs, two_objs_id, temp_shape, two_temp_objs_coord):
-    # informations of reference object
-    obj_cx1 = two_objs[0].cx
-    obj_cy1 = two_objs[0].cy
- 
-    obj_cx2 = two_objs[1].cx
-    obj_cy2 = two_objs[1].cy
+    def CalcYaw(self):
+        # informations of reference object
+        obj1_id = self.label_dict[bytes(self.objs[0].name, encoding='utf-8')]
+        obj2_id = self.label_dict[bytes(self.objs[1].name, encoding='utf-8')]
 
-    # informations of template image and object in template image
-    temp_w = temp_shape[1]
-    temp_h = temp_shape[0]
+        obj1_cx = self.objs[0].cx
+        obj1_cy = self.objs[0].cy
 
-    temp_obj_cx1 = int(two_temp_objs_coord[0][0] * temp_w)
-    temp_obj_cy1 = int(two_temp_objs_coord[0][1] * temp_h)
+        obj2_cx = self.objs[1].cx
+        obj2_cy = self.objs[1].cy
 
-    temp_obj_cx2 = int(two_temp_objs_coord[1][0] * temp_w)
-    temp_obj_cy2 = int(two_temp_objs_coord[1][1] * temp_h)
+        print('obj_c: ', obj1_cx, obj1_cy, obj2_cx, obj2_cy)
 
-    tgt_vec = np.array([obj_cx2 - obj_cx1, obj_cy2 - obj_cy1])
-    temp_vec = np.array([temp_obj_cx2 - temp_obj_cx1, temp_obj_cy2 - temp_obj_cy1])
+        temp_obj1_cx = int(self.temp_objs_coord[obj1_id][0] * self.temp_w)
+        temp_obj1_cy = int(self.temp_objs_coord[obj1_id][1] * self.temp_h)
 
-    tgt_vec_norm = np.linalg.norm(tgt_vec)
-    temp_vec_norm = np.linalg.norm(temp_vec)
+        temp_obj2_cx = int(self.temp_objs_coord[obj2_id][0] * self.temp_w)
+        temp_obj2_cy = int(self.temp_objs_coord[obj2_id][1] * self.temp_h)
 
-    angle = np.arccos( np.dot(tgt_vec, temp_vec) / (tgt_vec_norm * temp_vec_norm)) 
-    rotation = np.cross(temp_vec, tgt_vec)
+        print('temp_obj_c: ', temp_obj1_cx, temp_obj1_cy, temp_obj2_cx, temp_obj2_cy)
 
-    if rotation < 0:
-        angle *= -1
+        tgt_vec = np.array([obj2_cx - obj1_cx, obj2_cy - obj1_cy])
+        temp_vec = np.array([temp_obj2_cx - temp_obj1_cx, temp_obj2_cy - temp_obj1_cy])
 
-    print('norm: ', tgt_vec_norm, temp_vec_norm)
+        print('vec: ', tgt_vec, temp_vec)
 
-    return angle * 180.0 / pi
+        tgt_vec_norm = np.linalg.norm(tgt_vec)
+        temp_vec_norm = np.linalg.norm(temp_vec)
+
+        yaw_rad = np.arccos( np.dot(tgt_vec, temp_vec) / (tgt_vec_norm * temp_vec_norm))
+        rotation = np.cross(temp_vec, tgt_vec)
+
+        if rotation < 0: yaw_rad *= -1
+
+        yaw_deg = yaw_rad * 180.0 / pi
+       
+        print('yaw, norm: ', yaw_rad, yaw_deg, tgt_vec_norm, temp_vec_norm)
+
+        return yaw_rad, yaw_deg
+
 
 
