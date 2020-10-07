@@ -54,8 +54,6 @@ cat << END_OF_CAT > "$JOB".torch
 
 cd $HERE
 
-workon pytorch1.5.1 
-
 echo "Your Pytorch job starts at  \`date\` "
 
 /home/hugh/.virtualenvs/pytorch1.5.1/bin/python3 train.py > $JOB.out 2> $JOB.err
