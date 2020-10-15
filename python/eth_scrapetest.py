@@ -102,7 +102,7 @@ while True:
                 time_diff = int(time.time() - value_list[0][1])
  
             else:
-                value_diff = eth_rate - value_list[count]
+                value_diff = eth_rate - value_list[count][0]
                 time_diff = int(time.time() - value_list[count][1])
  
         else:
