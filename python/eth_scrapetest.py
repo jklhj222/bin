@@ -84,6 +84,7 @@ while True:
 
     print('eth2twd: ', eth2twd)
     print('eth_rate: ', eth_rate)
+    print(value_list)
     print('count: ', count)
 
     if tmp_eth_rate != eth_rate:
@@ -108,8 +109,6 @@ while True:
             value_diff = 0 
             time_diff = 0
  
-        print(value_list)
-        print('count: ', count)
 
         tmp_eth_rate = eth_rate
  
