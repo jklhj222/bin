@@ -17,8 +17,8 @@ html = urlopen(req).read().decode('utf-8')
 
 soup = BeautifulSoup(html, features='lxml')
 
-#print(soup.h1)
-print(str(soup.p.b).split('>')[1].split('<')[0])
+print(soup.p.b)
+#print(str(soup.p.b).split('>')[1].split('<')[0])
 
 
 #file = open('test2.txt', 'w')
