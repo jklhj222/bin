@@ -61,7 +61,7 @@ echo "Your Pytorch job starts at  \`date\` "
 wait
 
 
-echo "Your Octopus job completed at  \`date\` "
+echo "Your Pytorch job completed at  \`date\` "
 
 END_OF_CAT
 
