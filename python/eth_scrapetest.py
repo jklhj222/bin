@@ -12,7 +12,7 @@ from tkinter import messagebox
 window = tk.Tk()
 # 設定視窗標題、大小和背景顏色
 window.title('ETH Exchange Rate')
-window.geometry('198x170')
+window.geometry('250x170')
 window.configure(background='darkblue')
 
 
