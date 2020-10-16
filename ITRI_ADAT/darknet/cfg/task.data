@@ -1,6 +1,6 @@
 classes=num_class
 train  = data/train.txt
 valid  = data/val.txt
-names = data/adat.names
+names = data/label.names
 backup = backup/
 
