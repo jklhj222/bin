@@ -1,0 +1,3 @@
+[DARKNET]
+MODEL_DIR = /mnt/sda1/work/MIRDC_2/yolov4-tinytrain_20201120/MIRDC_drone_v4-2
+SHARED_LIB = /home/hugh/pkg/local/darknet_alexyab_20200825_new/libdarknet.so
