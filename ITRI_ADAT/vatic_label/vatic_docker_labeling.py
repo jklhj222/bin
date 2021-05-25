@@ -54,6 +54,11 @@ parser.add_argument('--show_images_with_no_labels',
                     default=False,
                     action='store_true')
 
+parser.add_argument('--show_diagonal',
+                    help='set to show the box with diagonal. Default=False',
+                    default=False,
+                    action='store_true')
+
 args = parser.parse_args()
 
 if not args.video_path: 
@@ -316,9 +321,10 @@ def check_labels(data_dir=data_dir):
                 ymax = int( ymax*img_height )
 
                 cv2.rectangle(img, (xmin, ymin), (xmax, ymax), (0, 0, 255), 5)
-                cv2.line(img, (xmin, ymin), (xmax, ymax), (0, 0, 255), 5)
-                cv2.line(img, (xmax, ymin), (xmin, ymax), (0, 0, 255), 5)
-                cv2.circle(img, (int((xmax+xmin)/2.0), int((ymax+ymin)/2.0)), 15, (0, 255, 0), -1)
+                if args.show_diagonal:
+                    cv2.line(img, (xmin, ymin), (xmax, ymax), (0, 0, 255), 5)
+                    cv2.line(img, (xmax, ymin), (xmin, ymax), (0, 0, 255), 5)
+                    cv2.circle(img, (int((xmax+xmin)/2.0), int((ymax+ymin)/2.0)), 15, (0, 255, 0), -1)
 
                 font = cv2.FONT_HERSHEY_SIMPLEX
                 cv2.putText(img, category, (xmin, ymin), font, 
