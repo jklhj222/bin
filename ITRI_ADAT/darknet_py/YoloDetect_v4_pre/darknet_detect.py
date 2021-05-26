@@ -44,6 +44,10 @@ parser_video = subparsers.add_parser('video_detect',
 parser_video.add_argument('--video_path', default=None, 
                           required=True, help='default=None')
 
+parser_video.add_argument('--check_delay',
+                    help='time delay when checking. Default=33 ms (FPS: 30)',
+                    default=33)
+
 parser_video.add_argument('--save_video', default=False, action='store_true',
                           help='default=False')
 
@@ -132,7 +136,7 @@ def ImgDetect(img_path, net, meta, darknet_data, save_path='./',
     return objs
 
 
-def VideoDetect(video_path, label_dict, 
+def VideoDetect(video_path, check_delay, label_dict, 
                 save_video=False, auto_label=False, skip_nolabel=False,
                 resize=1.0, exclude_objs='background', autolabel_dir='images'):
 
@@ -185,9 +189,9 @@ def VideoDetect(video_path, label_dict,
             out.write(img)
 
 #        cv2.imshow(dirname + '/' + filename, img)
-        cv2.imshow(args.video_path, img)
+        cv2.imshow(video_path, img)
 
-        k = cv2.waitKey(1) & 0xFF
+        k = cv2.waitKey(int(check_delay)) & 0xFF
 
         if k == 27 or k== ord('q'):
             break
@@ -200,7 +204,8 @@ def VideoDetect(video_path, label_dict,
 
 if __name__ == '__main__':
     if args.subparsers == 'video_detect':
-        VideoDetect(args.video_path, label_dict, 
+        print('check_delay: ', args.check_delay)
+        VideoDetect(args.video_path, args.check_delay, label_dict, 
                     save_video=args.save_video,
                     auto_label=args.auto_label,
                     skip_nolabel=args.skip_nolabel,
