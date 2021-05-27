@@ -51,6 +51,9 @@ parser_video.add_argument('--check_delay',
 parser_video.add_argument('--save_video', default=False, action='store_true',
                           help='default=False')
 
+parser_video.add_argument('--save_images', default=False, action='store_true',
+                          help='default=False')
+
 parser_video.add_argument('--auto_label', default=False, action='store_true',
                           help='default=False')
 
@@ -136,7 +139,7 @@ def ImgDetect(img_path, net, meta, darknet_data, save_path='./',
     return objs
 
 
-def VideoDetect(video_path, check_delay, label_dict, 
+def VideoDetect(video_path, check_delay, label_dict, save_images=False,
                 save_video=False, auto_label=False, skip_nolabel=False,
                 resize=1.0, exclude_objs='background', autolabel_dir='images'):
 
@@ -153,6 +156,18 @@ def VideoDetect(video_path, check_delay, label_dict,
         out = cv2.VideoWriter('output.avi', fourcc, 30.0, (width, height))
 
     ii=0
+
+    if save_images:
+        import shutil
+
+        if not os.path.isdir('out_images'):
+            os.mkdir('out_images')
+
+        else:
+            shutil.rmtree('out_images')
+
+            os.mkdir('out_images')
+
     while (cap.isOpened()):
         ii+=1
         ret, frame = cap.read()
@@ -183,10 +198,16 @@ def VideoDetect(video_path, check_delay, label_dict,
                                  skip_nolabel=args.skip_nolabel
                                 )
 
-        img = YoloObj.DrawBBox(new_objs, frame, show=False, save=False)
+        img = YoloObj.DrawBBox(new_objs, frame, 
+                               show=False, save=False,
+                               line_width=1, text_size=3)
 
         if save_video:
             out.write(img)
+
+        if save_images:
+            cv2.imwrite(f'out_images/frame{ii:05d}.jpg', img)
+
 
 #        cv2.imshow(dirname + '/' + filename, img)
         cv2.imshow(video_path, img)
@@ -205,7 +226,8 @@ def VideoDetect(video_path, check_delay, label_dict,
 if __name__ == '__main__':
     if args.subparsers == 'video_detect':
         print('check_delay: ', args.check_delay)
-        VideoDetect(args.video_path, args.check_delay, label_dict, 
+        VideoDetect(args.video_path, args.check_delay, label_dict,
+                    save_images=args.save_images, 
                     save_video=args.save_video,
                     auto_label=args.auto_label,
                     skip_nolabel=args.skip_nolabel,

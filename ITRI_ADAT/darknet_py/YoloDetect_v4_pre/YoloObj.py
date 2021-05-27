@@ -123,11 +123,12 @@ def ObjsPOI(innerObj, outerObj):
     return POI 
 
 
-def DrawBBox(objs, img, show=True, 
-             save=False, save_path='./test_pic.jpg', resize_ratio=None):
+def DrawBBox(objs, img, show=True, save=False, 
+             line_width=1, text_size=3,
+             save_path='./test_pic.jpg', resize_ratio=None):
 #    import cv2
     for obj in objs:
-        cv2.rectangle(img, (obj.l, obj.t), (obj.r, obj.b), (0, 255, 0), 5)
+        cv2.rectangle(img, (obj.l, obj.t), (obj.r, obj.b), (0, 255, 0), text_size)
        
         image = cv2.putText(img,
                             obj.name + str(obj.conf),
@@ -135,7 +136,7 @@ def DrawBBox(objs, img, show=True,
                             cv2.FONT_HERSHEY_TRIPLEX, 
                             0.5, 
                             (0, 255, 0), 
-                            1, 
+                            line_width, 
                             cv2.LINE_AA)
 
     if resize_ratio is not None:
