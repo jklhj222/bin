@@ -29,3 +29,5 @@ convert -rotate 30 "$img_file" "$filename"'_rotate.'"$fileext"
 # 0 means default, The default is to use the estimated quality of your input image if it can be determined, otherwise 92.
 convert -quality 90 "$img_file" "$filename"'_90.'"$fileext"
 
+# cut image file into size x*y by x_offset*y_offset
+convert "$img_file" -crop "$x"x"$y"+"$x_offset"+"$y_offset" "$filename"'_cut.'"$fileext"
