@@ -36,7 +36,7 @@ class TimePeriod():
         else:
             total_fps = 0 
 
-        return period_t, period_fps, self.total_t, total_fps
+        return self.call_times, period_t, period_fps, self.total_t, total_fps
 
 
 if __name__ == '__main__':
