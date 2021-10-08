@@ -84,7 +84,7 @@ def plot(imgs, figsize, subplot=None, showfig=True, savefig=None):
 
         plt.subplot(int(subplot[0]), int(subplot[1]), int(subplot[2]))
 
-        plt.title(img)
+        plt.title(f'{i} : ' + img)
 
         plt.imshow(imgs[img], cmap=plt.cm.gray)
 
