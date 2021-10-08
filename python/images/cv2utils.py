@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import cv2
+import matplotlib.pyplot as plt
 
 def cvshow(img, name='test'):
     cv2.imshow(name, img)
@@ -55,13 +56,23 @@ def bwareaopen(img, size):
     return output
 
 
-def plot(imgs, figsize, subplot, showfig=True, savefig=None):
+def plot(imgs, figsize, subplot=None, showfig=True, savefig=None):
     # imgs: collections.OrderedDict(imgs_list)
     #       imgs_list = [('original', img), ('gauss', img_gauss), ('absX', absX), ... ]
     # figsize: ex. (6, 6) (tuple)
     # subplot: number of column and row in figure. ex. [4, 3] (list)
     # showfig: True for show figure, False for not show.
     # savefig: None for not saving figure, file name for saving figure. ex. 'test.jpg' (str)
+
+    import numpy as np
+    from collections import OrderedDict
+
+    imgs = OrderedDict(imgs)
+    if subplot is None:
+        num_imgs = len(imgs)
+        num_rows = np.ceil(np.sqrt(num_imgs))
+        num_cols = np.ceil(num_imgs/num_rows)
+        subplot = [num_rows, num_cols]
 
     plt.figure(num='test',figsize=figsize)
 
@@ -79,14 +90,10 @@ def plot(imgs, figsize, subplot, showfig=True, savefig=None):
 
         plt.axis('off')
 
-    t_init = time.time()
     if savefig is not None:
         plt.savefig(savefig)
         plt.clf()
         plt.cla()
 
-    t = time.time() - t_init
-
     if showfig: plt.show()
 
-    return t
