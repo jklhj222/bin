@@ -90,10 +90,13 @@ def plot(imgs, figsize, subplot=None, showfig=True, savefig=None):
 
         plt.axis('off')
 
+    fig = plt.gcf()
+
+    if showfig: plt.show()
+
     if savefig is not None:
-        plt.savefig(savefig)
+        fig.savefig(savefig)
         plt.clf()
         plt.cla()
 
-    if showfig: plt.show()
 
