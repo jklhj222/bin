@@ -56,7 +56,7 @@ def bwareaopen(img, size):
     return output
 
 
-def plot(imgs, figsize, subplot=None, showfig=True, savefig=None):
+def plot(imgs, figsize, figname='test', subplot=None, showfig=True, savefig=None):
     # imgs: collections.OrderedDict(imgs_list)
     #       imgs_list = [('original', img), ('gauss', img_gauss), ('absX', absX), ... ]
     # figsize: ex. (6, 6) (tuple)
@@ -74,7 +74,7 @@ def plot(imgs, figsize, subplot=None, showfig=True, savefig=None):
         num_cols = np.ceil(num_imgs/num_rows)
         subplot = [num_rows, num_cols]
 
-    plt.figure(num='test',figsize=figsize)
+    plt.figure(num=figname, figsize=figsize)
 
     for i, img in enumerate(imgs):
         if i==0:
