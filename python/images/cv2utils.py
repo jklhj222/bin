@@ -66,6 +66,7 @@ def plot(imgs, figsize, figname='test', subplot=None, showfig=True, savefig=None
 
     import numpy as np
     from collections import OrderedDict
+    import gc
 
     imgs = OrderedDict(imgs)
     if subplot is None:
@@ -98,5 +99,6 @@ def plot(imgs, figsize, figname='test', subplot=None, showfig=True, savefig=None
         fig.savefig(savefig)
         plt.clf()
         plt.cla()
+        plt.close('all')
 
-
+        del fig
