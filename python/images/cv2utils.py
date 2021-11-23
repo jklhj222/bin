@@ -102,3 +102,31 @@ def plot(imgs, figsize, figname='test', subplot=None, showfig=True, savefig=None
         plt.close('all')
 
         del fig
+
+
+def fullTest(img, func_list):
+    # func_list: [
+    #             ('gray', cv2.cvtColor, [cv2.COLOR_BGR2GRAY], {}),
+    #             ('contrast_bright: b0, c50', ContrastBrightness, [], {'brightness': 0 , 'contrast': 50}),
+    #              ...
+    #            ]
+
+    import copy
+    func_list_ = copy.deepcopy(func_list)
+    img_orig = img.copy()
+
+    result_list = []
+    result_list.append(('original', img))
+    for func in func_list_:
+        f_name = func[0]
+        f = func[1]
+        args = func[2]
+        kargs = func[3]
+
+        args.insert(0, img)
+        img = f(*args, **kargs)
+
+        result_list.append((f_name, img))
+
+    return result_list
+
