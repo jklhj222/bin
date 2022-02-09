@@ -8,6 +8,7 @@ import DarknetFunc as DFUNC
 import YoloObj
 import cv2
 import os
+import glob
 
 parser = argparse.ArgumentParser()
 
@@ -40,6 +41,24 @@ parser_img.add_argument('--save_path', default='./test_pic.jpg',
 
 parser_img.add_argument('--exclude_objs', nargs='+', default='background',
                         help='default="background"')
+
+# parameters for images in a directory detection.
+parser_imgs = subparsers.add_parser('imgs_detect', 
+                                    help='single image detect.')
+parser_imgs.add_argument('--imgs_path', default=None, 
+                         required=True, help='default=None')
+
+parser_imgs.add_argument('--noshow_img', default=False, 
+                         action='store_true', help='default=True')
+
+parser_imgs.add_argument('--save_img', default=False, 
+                         action='store_true', help='default=False')
+
+parser_imgs.add_argument('--output_dir', default=None, 
+                         help='default=None')
+
+parser_imgs.add_argument('--exclude_objs', nargs='+', default='background',
+                         help='default="background"')
 
 # parameters for video detection.
 parser_video = subparsers.add_parser('video_detect', 
@@ -242,6 +261,22 @@ if __name__ == '__main__':
         ImgDetect(args.img_path, net, meta, darknet_data,
                   save_path=args.save_path, 
                   noshow_img=args.noshow_img, save_img=args.save_img)
+
+    elif args.subparsers == 'imgs_detect':
+        img_fs = glob.glob(os.path.join(args.imgs_path, '*.jpg')) 
+
+        output_dir = args.output_dir
+        
+
+        for img_f in img_fs:
+            img_f_basename = os.path.basename(img_f)
+     
+            save_path = os.path.join(output_dir, img_f_basename)
+
+            ImgDetect(img_f, net, meta, darknet_data,
+                      save_path=save_path, 
+                      noshow_img=args.noshow_img, save_img=args.save_img)
+            
 
     else:
         print('Nothing to do.')
