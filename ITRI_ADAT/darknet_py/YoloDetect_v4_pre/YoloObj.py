@@ -127,15 +127,22 @@ def DrawBBox(objs, img, show=True, save=False,
              line_width=1, text_size=3,
              save_path='./test_pic.jpg', resize_ratio=None):
 #    import cv2
+
     for obj in objs:
-        cv2.rectangle(img, (obj.l, obj.t), (obj.r, obj.b), (0, 255, 0), text_size)
+        if 'abnormal' in obj.name:
+            color = (0, 0, 255)
+
+        else:
+            color = (0, 255, 0)
+
+        cv2.rectangle(img, (obj.l, obj.t), (obj.r, obj.b), color, text_size)
        
         image = cv2.putText(img,
                             obj.name + str(obj.conf),
                             (obj.l, obj.t-10), 
                             cv2.FONT_HERSHEY_TRIPLEX, 
                             0.5, 
-                            (0, 255, 0), 
+                            color, 
                             line_width, 
                             cv2.LINE_AA)
 
