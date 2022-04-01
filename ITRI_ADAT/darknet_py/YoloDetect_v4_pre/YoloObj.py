@@ -136,10 +136,12 @@ def DrawBBox(objs, img, show=True, save=False,
             color = (0, 255, 0)
 
         cv2.rectangle(img, (obj.l, obj.t), (obj.r, obj.b), color, text_size)
-       
+
+        text_x = obj.l
+        text_y = obj.t - 10 if obj.t > 30 else obj.b + 20 
         image = cv2.putText(img,
                             obj.name + str(obj.conf),
-                            (obj.l, obj.t-10), 
+                            (text_x, text_y), 
                             cv2.FONT_HERSHEY_TRIPLEX, 
                             0.5, 
                             color, 
