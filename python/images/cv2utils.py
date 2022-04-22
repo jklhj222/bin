@@ -130,3 +130,22 @@ def fullTest(img, func_list):
 
     return result_list
 
+
+def zoomin(img_f, scale=2.5, cut_size=(768, 432)):
+    img = cv2.imread(img_f)
+
+    h, w, c = img.shape
+    hz = int(h * 2.5)
+    wz = int(w * 2.5)
+    print(h*scale, w*scale)
+
+    img_z = cv2.resize(img, (wz, hz), 
+                       interpolation=cv2.INTER_AREA)
+
+    img_crop = img_z[int((hz/2)-(cut_size[1]/2)):int((hz/2)+(cut_size[1]/2)),
+                     int((wz/2)-(cut_size[0]/2)):int((wz/2)+(cut_size[0]/2))]
+
+#    cvshow(img_crop)
+
+    return img_crop
+
