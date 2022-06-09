@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+from turtle import pos
 import cv2
 import time
 import configparser
@@ -21,6 +22,8 @@ parser.add_argument('--resize', default=1.0, help='default=1.0')
 parser.add_argument('--gpu_idx', default='0', help='default=0')
 
 parser.add_argument('--thresh', default=0.25, help='default=0.25')
+
+parser.add_argument('--net_size', default=None, help='default=416')
 
 subparsers = parser.add_subparsers(dest='subparsers', help='img_detect, video_detect')
 
@@ -53,6 +56,9 @@ parser_imgs.add_argument('--noshow_img', default=False,
 
 parser_imgs.add_argument('--save_img', default=False, 
                          action='store_true', help='default=False')
+
+parser_imgs.add_argument('--target_class', default=None, 
+                         help='positive class')
 
 parser_imgs.add_argument('--output_dir', default=None, 
                          help='default=None')
@@ -123,6 +129,9 @@ print(darknet_data, darknet_weights, darknet_cfg)
 os.environ['CUDA_VISIBLE_DEVICES'] = args.gpu_idx
 print(os.environ['CUDA_VISIBLE_DEVICES'])
 
+if args.net_size is not None:
+    YoloObj.ChangeNetSize(darknet_cfg, args.net_size)
+
 net = DFUNC.load_net(bytes(darknet_cfg, 'utf-8'), 
                      bytes(darknet_weights, 'utf-8'), 0)
 meta = DFUNC.load_meta(bytes(darknet_data, 'utf-8'))
@@ -134,6 +143,12 @@ label_dict = {}
 for idx in range(meta.classes):
     label_dict[meta.names[idx]] = idx
 
+label_count_dict = {}
+for label_count in label_dict:
+    label_count_dict[label_count.decode()] = 0
+
+print('label_dict: ', label_dict)
+print('label_count_dict: ', label_count_dict)
 
 def ImgDetect(img_path, net, meta, darknet_data, save_path='./',
               noshow_img=True, save_img=False):
@@ -150,10 +165,11 @@ def ImgDetect(img_path, net, meta, darknet_data, save_path='./',
         obj = YoloObj.DetectedObj(result)
         objs.append(obj)
 
+    # print info.
+    print(args.imgs_path)
     for obj in objs:
-        print(obj.obj_string, obj.cx, obj.cy)
-
-    print('Number of objects: ', len(objs), '\n')
+        print(obj.obj_string, obj.cx, obj.cy) 
+    print(f'Number of objects: {len(objs)},  target_class: {args.target_class}')
 
     YoloObj.DrawBBox(objs, img, 
                      show=not noshow_img, save=save_img, save_path=save_path)
@@ -161,7 +177,7 @@ def ImgDetect(img_path, net, meta, darknet_data, save_path='./',
     return objs
 
 
-def VideoDetect(video_path, check_delay, label_dict, save_images=False,
+def VideoDetect(video_path, check_delay, label_dict, save_images=False, 
                 save_video=False, auto_label=False, skip_nolabel=False,
                 resize=1.0, exclude_objs='background', autolabel_dir='images'):
 
@@ -264,19 +280,70 @@ if __name__ == '__main__':
 
     elif args.subparsers == 'imgs_detect':
         img_fs = glob.glob(os.path.join(args.imgs_path, '*.jpg')) 
+        img_fs.sort()
+        total_frame = len(img_fs)
 
         output_dir = args.output_dir
-        
+        result_log = output_dir + '_log.txt' 
+        f_log = open(result_log, 'w')
 
-        for img_f in img_fs:
+        if args.target_class is not None:
+            positive_conf = []
+            negative_conf = []
+
+        for idx, img_f in enumerate(img_fs):
             img_f_basename = os.path.basename(img_f)
      
             save_path = os.path.join(output_dir, img_f_basename)
 
-            ImgDetect(img_f, net, meta, darknet_data,
-                      save_path=save_path, 
-                      noshow_img=args.noshow_img, save_img=args.save_img)
-            
+            objs = ImgDetect(img_f, net, meta, darknet_data,
+                             save_path=save_path, 
+                             noshow_img=args.noshow_img, save_img=args.save_img)
+
+            f_log.write(str(idx+1) + ': ' + img_f + '\n')
+            for obj in objs:
+                label_count_dict[obj.name] += 1
+
+                if args.target_class is not None:
+                    if obj.name == args.target_class:
+                        positive_conf.append(obj.conf)
+                        f_log.write(f'{obj.obj_string}   True\n')
+                        print(f'True {idx+1}/{total_frame}')
+                    else:
+                        negative_conf.append(obj.conf)
+                        f_log.write(f'{obj.obj_string}   False\n')
+                        print(f'False {idx+1}/{total_frame}')
+
+
+            f_log.write('\n')
+            print('\n')
+
+        if args.target_class is not None:
+            positive_conf.sort()
+            negative_conf.sort()
+            total_tag = len(positive_conf) + len(negative_conf)
+
+        f_log.write(str(label_count_dict) + '\n')
+
+        if args.target_class is not None:
+            accuracy = label_count_dict[args.target_class] / total_tag * 100
+            f_log.write(f'    target class: {args.target_class}\n')
+            f_log.write(f'    Total frames: {total_frame:6d}\n')
+            f_log.write(f'      Total tags: {len(positive_conf)+len(negative_conf):6d}\n')
+            f_log.write(f'   True Positive: {len(positive_conf):6d}\n')
+            f_log.write(f'  False Negative: {len(negative_conf):6d}\n')
+            f_log.write(f'        Accuracy: {accuracy:6.1f}\n')
+            f_log.write(f'Precision/Recall: {len(positive_conf)/total_frame*100:6.1f}\n')
+            try:
+                f_log.write(f'   Positive conf: {sum(positive_conf)/len(positive_conf):6.1f} {positive_conf[0]:>6.1f} {positive_conf[-1]:>6.1f}\n')
+            except:
+                f_log.write(f'   Positive conf: {"N/A":>6s} {"N/A":>6s} {"N/A":>6s}\n')
+            try:
+                f_log.write(f'   Negetive conf: {sum(negative_conf)/len(negative_conf):6.1f} {negative_conf[0]:>6.1f} {negative_conf[-1]:>6.1f}\n')
+            except:
+                f_log.write(f'   Negetive conf: {"N/A":>6s} {"N/A":>6s} {"N/A":>6s}\n')
+
+        f_log.close()
 
     else:
         print('Nothing to do.')

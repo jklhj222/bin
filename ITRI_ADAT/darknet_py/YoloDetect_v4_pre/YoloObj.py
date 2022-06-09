@@ -129,7 +129,8 @@ def DrawBBox(objs, img, show=True, save=False,
 #    import cv2
 
     for obj in objs:
-        if 'abnormal' in obj.name:
+#        if 'abnormal' in obj.name:
+        if 'Unlock' in obj.name:
             color = (0, 0, 255)
 
         else:
@@ -222,6 +223,18 @@ def ObjFlowNum(cur_objs, pre_objs, direction, baseline):
     return num_obj
 
 
+def ChangeNetSize(darknet_cfg, net_size):
+    with open(darknet_cfg, 'r') as f:
+        lines = f.readlines()
+
+    with open(darknet_cfg, 'w') as f_w:
+        for line in lines:
+            if 'width' in line:
+                line = line.replace(line, f'width = {net_size}\n')
+            if 'height' in line:
+                line = line.replace(line, f'height = {net_size}\n')
+
+            f_w.write(line)
 
 
 
