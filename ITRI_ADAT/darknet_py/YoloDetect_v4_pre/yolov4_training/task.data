@@ -1,6 +1,6 @@
-classes=8
+classes=4
 train=train.txt
 valid=val.txt
 backup=backup
-arch=yolov4
+arch=yolov4-tiny
 names=label.names

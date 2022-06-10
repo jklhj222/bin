@@ -1,8 +1,4 @@
-connect_normal
-connect_abnormal
-handle_normal
-handle_abnormal
-plate_normal
-plate_abnormal
-screw_normal
-screw_abnormal
+oring_exist
+oring_noexist
+pin_exist
+pin_noexist

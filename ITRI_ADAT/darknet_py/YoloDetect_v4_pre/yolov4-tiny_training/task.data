@@ -1,6 +1,0 @@
-classes=8
-train=train.txt
-valid=val.txt
-backup=backup
-arch=yolov4
-names=label.names
