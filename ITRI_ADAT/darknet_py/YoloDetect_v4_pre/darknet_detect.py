@@ -23,7 +23,7 @@ parser.add_argument('--gpu_idx', default='0', help='default=0')
 
 parser.add_argument('--thresh', default=0.25, help='default=0.25')
 
-parser.add_argument('--net_size', default=None, help='default=416')
+parser.add_argument('--net_size', default=None, help='default=None')
 
 subparsers = parser.add_subparsers(dest='subparsers', help='img_detect, video_detect')
 
@@ -287,10 +287,12 @@ if __name__ == '__main__':
         result_log = output_dir + '_log.txt' 
         f_log = open(result_log, 'w')
 
-        if args.target_class is not None:
+        if args.target_class:
             positive_conf = []
             negative_conf = []
-
+ 
+        frame_detected = 0
+        nobj = 0
         for idx, img_f in enumerate(img_fs):
             img_f_basename = os.path.basename(img_f)
      
@@ -301,35 +303,45 @@ if __name__ == '__main__':
                              noshow_img=args.noshow_img, save_img=args.save_img)
 
             f_log.write(str(idx+1) + ': ' + img_f + '\n')
+            if args.target_class and len(objs) == 0:
+                print(f'Empty, Frame detected: {frame_detected}, Total: {idx+1}/{total_frame}')
+      
+            if not args.target_class:
+                print(f'Frame detected: {frame_detected}, Total: {idx+1}/{total_frame}')
+
+            if len(objs) != 0:
+                nobj += len(objs)
+                frame_detected += 1
+
             for obj in objs:
                 label_count_dict[obj.name] += 1
 
-                if args.target_class is not None:
+                if args.target_class:
                     if obj.name == args.target_class:
                         positive_conf.append(obj.conf)
                         f_log.write(f'{obj.obj_string}   True\n')
-                        print(f'True {idx+1}/{total_frame}')
+                        print(f' True, Frame detected: {frame_detected}, Total: {idx+1}/{total_frame}')
                     else:
                         negative_conf.append(obj.conf)
                         f_log.write(f'{obj.obj_string}   False\n')
-                        print(f'False {idx+1}/{total_frame}')
+                        print(f'False, Frame detected: {frame_detected}, Total: {idx+1}/{total_frame}')
 
 
             f_log.write('\n')
             print('\n')
 
-        if args.target_class is not None:
+        if args.target_class:
             positive_conf.sort()
             negative_conf.sort()
             total_tag = len(positive_conf) + len(negative_conf)
 
         f_log.write(str(label_count_dict) + '\n')
 
-        if args.target_class is not None:
+        if args.target_class:
             accuracy = label_count_dict[args.target_class] / total_tag * 100
             f_log.write(f'    target class: {args.target_class}\n')
             f_log.write(f'    Total frames: {total_frame:6d}\n')
-            f_log.write(f'      Total tags: {len(positive_conf)+len(negative_conf):6d}\n')
+            f_log.write(f'      Total tags: {nobj:6d}\n')
             f_log.write(f'   True Positive: {len(positive_conf):6d}\n')
             f_log.write(f'  False Negative: {len(negative_conf):6d}\n')
             f_log.write(f'        Accuracy: {accuracy:6.1f}\n')
@@ -342,6 +354,11 @@ if __name__ == '__main__':
                 f_log.write(f'   Negetive conf: {sum(negative_conf)/len(negative_conf):6.1f} {negative_conf[0]:>6.1f} {negative_conf[-1]:>6.1f}\n')
             except:
                 f_log.write(f'   Negetive conf: {"N/A":>6s} {"N/A":>6s} {"N/A":>6s}\n')
+
+        else:
+            f_log.write(f'    Total frames: {total_frame:6d}\n')
+            f_log.write(f' Detected frames: {frame_detected:6d}\n')
+            f_log.write(f'      Total tags: {nobj:6d}\n')
 
         f_log.close()
 

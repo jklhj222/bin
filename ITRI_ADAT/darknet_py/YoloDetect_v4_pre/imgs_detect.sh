@@ -1,9 +1,14 @@
 #!/bin/bash
 #target_class='MV-0_Lock'
-target_class='MV-0_Unlock'
-net_size=416
+#target_class='MV-0_Unlock'
+#net_size=1024
 
 main_dir='/home/jklhj/work/ADAT/Innolux/innolux_rotate_img_20220607'
+
+for target_class in MV-0_Lock MV-0_Unlock
+do
+for net_size in 416 1024
+do
 
 ## customerize
 cd $main_dir
@@ -56,9 +61,12 @@ do
             --target_class "$target_class" \
             --noshow_img 
 
+    cp -r $output_dir results/"$imgs_dir"
+    cp "$output_dir"_log.txt results/"$imgs_dir"
+    rm -r $output_dir "$output_dir"_log.txt
+
   done
-  cp -r *MV0* results/"$imgs_dir"/
-  rm -r *MV0* 
-#  mv *MV0* results/"$imgs_dir"/
 done
 
+done
+done
