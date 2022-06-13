@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-
 from turtle import pos
 import cv2
 import time
@@ -10,6 +9,8 @@ import YoloObj
 import cv2
 import os
 import glob
+
+import calc_period as cp
 
 parser = argparse.ArgumentParser()
 
@@ -24,6 +25,8 @@ parser.add_argument('--gpu_idx', default='0', help='default=0')
 parser.add_argument('--thresh', default=0.25, help='default=0.25')
 
 parser.add_argument('--net_size', default=None, help='default=None')
+
+parser.add_argument('--negative_obj', type=str, nargs='+', default=[], help='default=[]')
 
 subparsers = parser.add_subparsers(dest='subparsers', help='img_detect, video_detect')
 
@@ -93,6 +96,8 @@ parser_video.add_argument('--exclude_objs', nargs='+', default='background',
 
 args = parser.parse_args()
 
+print('negative_obj: ', args.negative_obj)
+
 #cfg_file = 'config.txt'
 cfg_file = args.cfg_file
 config = configparser.RawConfigParser()
@@ -151,7 +156,7 @@ print('label_dict: ', label_dict)
 print('label_count_dict: ', label_count_dict)
 
 def ImgDetect(img_path, net, meta, darknet_data, save_path='./',
-              noshow_img=True, save_img=False):
+              negative=[], noshow_img=True, save_img=False):
 
     import YoloObj
 
@@ -171,8 +176,8 @@ def ImgDetect(img_path, net, meta, darknet_data, save_path='./',
         print(obj.obj_string, obj.cx, obj.cy) 
     print(f'Number of objects: {len(objs)},  target_class: {args.target_class}')
 
-    YoloObj.DrawBBox(objs, img, 
-                     show=not noshow_img, save=save_img, save_path=save_path)
+    YoloObj.DrawBBox(objs, img, show=not noshow_img, 
+                     negative_obj=args.negative_obj, save=save_img, save_path=save_path)
 
     return objs
 
@@ -279,6 +284,8 @@ if __name__ == '__main__':
                   noshow_img=args.noshow_img, save_img=args.save_img)
 
     elif args.subparsers == 'imgs_detect':
+        time_period = cp.TimePeriod()
+
         img_fs = glob.glob(os.path.join(args.imgs_path, '*.jpg')) 
         img_fs.sort()
         total_frame = len(img_fs)
@@ -294,6 +301,8 @@ if __name__ == '__main__':
         frame_detected = 0
         nobj = 0
         for idx, img_f in enumerate(img_fs):
+            t = time_period.calc_period()
+
             img_f_basename = os.path.basename(img_f)
      
             save_path = os.path.join(output_dir, img_f_basename)
@@ -304,10 +313,10 @@ if __name__ == '__main__':
 
             f_log.write(str(idx+1) + ': ' + img_f + '\n')
             if args.target_class and len(objs) == 0:
-                print(f'Empty, Frame detected: {frame_detected}, Total: {idx+1}/{total_frame}')
+                print(f'Empty, Frame detected: {frame_detected}, Total: {idx+1}/{total_frame}\nfps: {t}')
       
             if not args.target_class:
-                print(f'Frame detected: {frame_detected}, Total: {idx+1}/{total_frame}')
+                print(f'Frame detected: {frame_detected}, Total: {idx+1}/{total_frame}\nfps: {t}')
 
             if len(objs) != 0:
                 nobj += len(objs)
@@ -320,11 +329,11 @@ if __name__ == '__main__':
                     if obj.name == args.target_class:
                         positive_conf.append(obj.conf)
                         f_log.write(f'{obj.obj_string}   True\n')
-                        print(f' True, Frame detected: {frame_detected}, Total: {idx+1}/{total_frame}')
+                        print(f' True, Frame detected: {frame_detected}, Total: {idx+1}/{total_frame}\nfps: {t}')
                     else:
                         negative_conf.append(obj.conf)
                         f_log.write(f'{obj.obj_string}   False\n')
-                        print(f'False, Frame detected: {frame_detected}, Total: {idx+1}/{total_frame}')
+                        print(f'False, Frame detected: {frame_detected}, Total: {idx+1}/{total_frame}\nfps: {t}')
 
 
             f_log.write('\n')
@@ -344,7 +353,10 @@ if __name__ == '__main__':
             f_log.write(f'      Total tags: {nobj:6d}\n')
             f_log.write(f'   True Positive: {len(positive_conf):6d}\n')
             f_log.write(f'  False Negative: {len(negative_conf):6d}\n')
-            f_log.write(f'        Accuracy: {accuracy:6.1f}\n')
+            try:
+                f_log.write(f'        Accuracy: {accuracy:6.1f}\n')
+            except:
+                f_log.write(f'        Accuracy: {"N/A":>6s}\n')
             f_log.write(f'Precision/Recall: {len(positive_conf)/total_frame*100:6.1f}\n')
             try:
                 f_log.write(f'   Positive conf: {sum(positive_conf)/len(positive_conf):6.1f} {positive_conf[0]:>6.1f} {positive_conf[-1]:>6.1f}\n')

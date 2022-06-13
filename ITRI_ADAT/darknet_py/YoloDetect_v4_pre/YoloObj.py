@@ -124,13 +124,12 @@ def ObjsPOI(innerObj, outerObj):
 
 
 def DrawBBox(objs, img, show=True, save=False, 
-             line_width=1, text_size=3,
+             line_width=1, text_size=3, negative_obj=[],
              save_path='./test_pic.jpg', resize_ratio=None):
 #    import cv2
 
     for obj in objs:
-#        if 'abnormal' in obj.name:
-        if 'Unlock' in obj.name:
+        if obj.name in negative_obj:
             color = (0, 0, 255)
 
         else:
