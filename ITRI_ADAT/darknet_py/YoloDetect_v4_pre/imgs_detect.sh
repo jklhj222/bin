@@ -1,30 +1,17 @@
 #!/bin/bash
-#target_class='MV-0_Lock'
-#target_class='MV-0_Unlock'
 net_size=1024
 
 main_dir='/home/jklhj/work/ADAT/CPC/OringPin/'
-imgs_dirs='20220606_CPC_OringPin_32clips_frames'
+imgs_dirs='20220621_CPC_OringPin_Val_20clips_frames'
 negative_obj='oring_noexist pin_noexist'
+cp change_for_test.sh $main_dir'/'$imgs_dirs
 
-for target_class in oring_exist oring_noexist pin_exist pin_noexist 
+for target_class in oring_exist oring_noexist 
 do
 
 # customerize
 cd $main_dir'/'$imgs_dirs
-if [ "$target_class" = 'oring_exist' ]
-then
-    ./change_for_test.sh for_test_oringexist
-elif [ "$target_class" = 'oring_noexist' ]
-then
-    ./change_for_test.sh for_test_oringnoexist
-elif [ "$target_class" = 'pin_exist' ]
-then
-    ./change_for_test.sh for_test_pinexist
-elif [ "$target_class" = 'pin_noexist' ]
-then
-    ./change_for_test.sh for_test_pinnoexist
-fi
+./change_for_test.sh for_test_"$target_class"
 cd -
 #
 
@@ -52,7 +39,7 @@ do
 
     mkdir $output_dir
 
-    echo $imgs_path
+    echo imgs_path $imgs_path
 
     python3 darknet_detect.py \
             --cfg_file config.txt \
@@ -64,8 +51,8 @@ do
             imgs_detect \
             --imgs_path "$imgs_path" \
             --output_dir "$output_dir" \
-            --save_img \
             --target_class "$target_class" \
+            --save_img \
             --noshow_img 
 
     cp -r $output_dir results/"$imgs_dir"

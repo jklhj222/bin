@@ -25,6 +25,9 @@ parser.add_argument('--thresh', default=0.25, help='default=0.25')
 
 parser.add_argument('--net_size', default=None, help='default=None')
 
+parser.add_argument('--negative_obj', nargs='+', default='abnormal',
+                         help='default="abnormal"')
+
 subparsers = parser.add_subparsers(dest='subparsers', help='img_detect, video_detect')
 
 # parameters for single image detection.
@@ -151,7 +154,7 @@ print('label_dict: ', label_dict)
 print('label_count_dict: ', label_count_dict)
 
 def ImgDetect(img_path, net, meta, darknet_data, save_path='./',
-              noshow_img=True, save_img=False):
+              noshow_img=True, negative_obj=[], save_img=False):
 
     import YoloObj
 
@@ -171,8 +174,8 @@ def ImgDetect(img_path, net, meta, darknet_data, save_path='./',
         print(obj.obj_string, obj.cx, obj.cy) 
     print(f'Number of objects: {len(objs)},  target_class: {args.target_class}')
 
-    YoloObj.DrawBBox(objs, img, 
-                     show=not noshow_img, save=save_img, save_path=save_path)
+    YoloObj.DrawBBox(objs, img, show=not noshow_img, 
+                     save=save_img, negative_obj=negative_obj, save_path=save_path)
 
     return objs
 
@@ -299,7 +302,7 @@ if __name__ == '__main__':
             save_path = os.path.join(output_dir, img_f_basename)
 
             objs = ImgDetect(img_f, net, meta, darknet_data,
-                             save_path=save_path, 
+                             save_path=save_path, negative_obj=args.negative_obj,
                              noshow_img=args.noshow_img, save_img=args.save_img)
 
             f_log.write(str(idx+1) + ': ' + img_f + '\n')
