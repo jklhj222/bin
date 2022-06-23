@@ -10,6 +10,7 @@ import YoloObj
 import cv2
 import os
 import glob
+import calc_period
 
 parser = argparse.ArgumentParser()
 
@@ -294,9 +295,12 @@ if __name__ == '__main__':
             positive_confs = []
             negative_confs = []
  
+        time_period = calc_period.TimePeriod()
         frame_detected = 0
         nobj = 0
         for idx, img_f in enumerate(img_fs):
+            t = time_period.calc_period()
+
             img_f_basename = os.path.basename(img_f)
      
             save_path = os.path.join(output_dir, img_f_basename)
@@ -331,7 +335,7 @@ if __name__ == '__main__':
 
 
             f_log.write('\n')
-            print('\n')
+            print(f'{t}\n')
 
         if args.target_class:
             positive_confs.sort()
