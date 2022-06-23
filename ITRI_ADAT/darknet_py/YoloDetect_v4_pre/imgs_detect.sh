@@ -64,7 +64,7 @@ done
 done
 
 cd results/"$imgs_dir"
-echo clip,accuracy,acc_conf,false_rate,false_conf > total-log.txt
+echo clip,total_frame,accuracy,acc_avg_conf,acc_min_conf,acc_max_conf,false_rate,false_avg_conf,false_min_conf,false_max_conf,recall > total-log.txt
 for i in `ls *_log.txt`
 do 
   tail -1 $i >> total-log.txt

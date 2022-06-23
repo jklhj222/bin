@@ -354,36 +354,51 @@ if __name__ == '__main__':
                 anti_acc = 'N/A'
                 acc_str_f = '{:s}'
 
+            recall = (len(positive_confs)/total_frame) * 100
             f_log.write(f'    target class: {args.target_class}\n')
             f_log.write(f'    Total frames: {total_frame:6d}\n')
             f_log.write(f'      Total tags: {nobj:6d}\n')
             f_log.write(f'   True Positive: {len(positive_confs):6d}\n')
             f_log.write(f'  False Negative: {len(negative_confs):6d}\n')
             f_log.write(f'        Accuracy: {accuracy:6.1f}\n') if acc_str_f == '{:.1f}' else f_log.write(f'        Accuracy: {accuracy:>6s}\n')
-            f_log.write(f'Precision/Recall: {len(positive_confs)/total_frame*100:6.1f}\n')
+            f_log.write(f'          Recall: {recall:6.1f}\n')
  
             if len(positive_confs) > 0:
                 positive_conf = sum(positive_confs)/len(positive_confs)
+                pos_min_conf = positive_confs[0]
+                pos_max_conf = positive_confs[-1]
                 pos_str_f = '{:.1f}'
-                f_log.write(f'   Positive conf: {positive_conf:6.1f} {positive_confs[0]:>6.1f} {positive_confs[-1]:>6.1f}\n')
+                f_log.write(f'   Positive conf: {positive_conf:>6.1f} {pos_min_conf:>6.1f} {pos_max_conf:>6.1f}\n')
             else:
-                positive_conf = 'N/A'
+                positive_conf = pos_min_conf = pos_max_conf = 'N/A'
                 pos_str_f = '{:s}'
-                f_log.write(f'   Positive conf: {"N/A":6s} {"N/A":>6s} {"N/A":>6s}\n')
+                f_log.write(f'   Positive conf: {"N/A":>6s} {"N/A":>6s} {"N/A":>6s}\n')
 
             if len(negative_confs) > 0:
                 negative_conf = sum(negative_confs)/len(negative_confs)
+                neg_min_conf = negative_confs[0]
+                neg_max_conf = negative_confs[-1]
                 neg_str_f = '{:.1f}'
-                f_log.write(f'   Negetive conf: {negative_conf:6.1f} {negative_confs[0]:>6.1f} {negative_confs[-1]:>6.1f}\n')
+                f_log.write(f'   Negetive conf: {negative_conf:>6.1f} {neg_min_conf:>6.1f} {neg_max_conf:>6.1f}\n')
             else:
-                negative_conf = 'N/A'
-                neg_str_f = '{:6s}'
-                f_log.write(f'   Negetive conf: {"N/A":6s} {"N/A":>6s} {"N/A":>6s}\n')
+                negative_conf = neg_min_conf = neg_max_conf = 'N/A'
+                neg_str_f = '{:s}'
+                f_log.write(f'   Negetive conf: {"N/A":>6s} {"N/A":>6s} {"N/A":>6s}\n')
 
-            summary_str_f = '{},' + acc_str_f + ',' + pos_str_f + ',' + acc_str_f + ',' + neg_str_f + '\n'
+            summary_str_f = '{},{},' \
+                            + acc_str_f + ',' \
+                            + pos_str_f + ',' + pos_str_f + ','+ pos_str_f + ',' \
+                            + acc_str_f + ',' \
+                            + neg_str_f + ',' + neg_str_f + ',' + neg_str_f + ',' \
+                            + acc_str_f + '\n'
 
             imgs_dir_base = os.path.basename(args.imgs_path)
-            summary_str = summary_str_f.format(imgs_dir_base, accuracy, positive_conf, anti_acc, negative_conf)
+            summary_str = summary_str_f.format(imgs_dir_base, total_frame, 
+                                               accuracy, 
+                                               positive_conf, pos_min_conf, pos_max_conf, 
+                                               anti_acc, 
+                                               negative_conf, neg_min_conf, neg_max_conf, 
+                                               recall)
 
             f_log.write(summary_str)
 
