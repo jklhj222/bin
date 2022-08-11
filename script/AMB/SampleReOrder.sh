@@ -1,6 +1,6 @@
 #!/bin/bash
 
-read -p 'Initail index: ' init
+read -p 'Initial index: ' init
 read -p 'Video numbers: ' num
 read -p 'Type name: ' type_name
 #init=24
