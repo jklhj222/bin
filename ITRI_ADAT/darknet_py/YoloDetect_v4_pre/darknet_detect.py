@@ -406,6 +406,7 @@ if __name__ == '__main__':
             f_log.write(f'    Total frames: {total_frame:6d}\n')
             f_log.write(f' Detected frames: {frame_detected:6d}\n')
             f_log.write(f'      Total tags: {nobj:6d}\n')
+            f_log.write(f'Models: {darknet_model_dir}\n')
 
         f_log.close()
 

@@ -1,8 +1,9 @@
 #!/bin/bash
 
-video_dir='20211224_M7_UCA_25clips'
-out_dir="$video_dir"_frames
+read -p 'video_dir: ' video_dir
+#video_dir='20211224_M7_UCA_25clips'
 video_type='.mp4'
+out_dir="$video_dir"_frames
 
 mkdir $out_dir
 
