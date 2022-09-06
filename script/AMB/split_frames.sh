@@ -14,6 +14,7 @@ do
 
   mkdir "$out_dir"'/'"$name"
   # -qscale normal range for JPEG is 2-31 with 31 being the worst quality.
-  ffmpeg -i "$video_dir"'/'"$video" -qscale:v 2 "$out_dir"'/'"$name"'/frame_%05d.jpg'
+  # You can use a value of 1 but you must add the -qmin 1 output option (because the default is -qmin 2).
+  ffmpeg -i "$video_dir"'/'"$video" -qmin 1 -qscale:v 2 "$out_dir"'/'"$name"'/frame_%05d.jpg'
 
 done
