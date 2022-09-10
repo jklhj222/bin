@@ -345,7 +345,7 @@ if __name__ == '__main__':
         f_log.write(str(label_count_dict) + '\n')
 
         if args.target_class:
-            if total_tag >= 0:
+            if total_tag > 0:
                 accuracy = label_count_dict[args.target_class] / total_tag * 100
                 anti_acc = 100 - accuracy
                 acc_str_f = '{:.1f}'
@@ -357,6 +357,7 @@ if __name__ == '__main__':
             recall = (len(positive_confs)/total_frame) * 100
             f_log.write(f'    target class: {args.target_class}\n')
             f_log.write(f'    Total frames: {total_frame:6d}\n')
+            f_log.write(f'    Empty frames: {total_frame-frame_detected:6d}\n')
             f_log.write(f'      Total tags: {nobj:6d}\n')
             f_log.write(f'   True Positive: {len(positive_confs):6d}\n')
             f_log.write(f'  False Negative: {len(negative_confs):6d}\n')
@@ -385,7 +386,7 @@ if __name__ == '__main__':
                 neg_str_f = '{:s}'
                 f_log.write(f'   Negetive conf: {"N/A":>6s} {"N/A":>6s} {"N/A":>6s}\n')
 
-            summary_str_f = '{},{},' \
+            summary_str_f = '{},{},{}' \
                             + acc_str_f + ',' \
                             + pos_str_f + ',' + pos_str_f + ','+ pos_str_f + ',' \
                             + acc_str_f + ',' \
@@ -393,13 +394,14 @@ if __name__ == '__main__':
                             + acc_str_f + '\n'
 
             imgs_dir_base = os.path.basename(args.imgs_path)
-            summary_str = summary_str_f.format(imgs_dir_base, total_frame, 
+            summary_str = summary_str_f.format(imgs_dir_base, total_frame, total_frame-frame_detected,
                                                accuracy, 
                                                positive_conf, pos_min_conf, pos_max_conf, 
                                                anti_acc, 
                                                negative_conf, neg_min_conf, neg_max_conf, 
                                                recall)
 
+            f_log.write(f'Models: {darknet_model_dir}\n')
             f_log.write(summary_str)
 
         else:

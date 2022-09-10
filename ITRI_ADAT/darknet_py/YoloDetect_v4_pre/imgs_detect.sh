@@ -1,30 +1,10 @@
 #!/bin/bash
-net_size=1024
+net_size=416
 
-main_dir='/home/jklhj/work/ADAT/CPC/OringPin/'
-imgs_dirs='20220621_CPC_OringPin_Val_20clips_frames'
-negative_obj='oring_noexist pin_noexist'
-cp change_for_test.sh $main_dir'/'$imgs_dirs
+main_dir='/home/jklhj/work/ADAT/ASML_CS/20220905_ASML_CS/'
+imgs_dirs='20220905_ASML_CS_Val_12clips_frames_2d5'
+negative_obj='screw_abnormal'
 
-for target_class in oring_exist oring_noexist 
-do
-
-# customerize
-cd $main_dir'/'$imgs_dirs
-./change_for_test.sh for_test_"$target_class"
-cd -
-#
-
-#if [ "$net_size" = '416' ]
-#then
-#    imgs_dirs='labelclip_rotate_-5deg labelclip_rotate_5deg labelclip_rotate_-10deg labelclip_rotate_10deg labelclip_rotate_-15deg labelclip_rotate_15deg labelclip_rotate_-20deg labelclip_rotate_20deg  labelclip_rotate_-25deg labelclip_rotate_25deg labelclip_rotate_-30deg labelclip_rotate_30deg'
-#elif [ "$net_size" = '1024' ]
-#then
-#    imgs_dirs='labelclip_rotate_0deg'
-#fi
-
-#for imgs_dir in labelclip_rotate_-5deg labelclip_rotate_5deg labelclip_rotate_-10deg labelclip_rotate_10deg labelclip_rotate_-15deg labelclip_rotate_15deg labelclip_rotate_-20deg labelclip_rotate_20deg  labelclip_rotate_-25deg labelclip_rotate_25deg labelclip_rotate_-30deg labelclip_rotate_30deg 
-#for imgs_dir in labelclip_rotate_0deg
 for imgs_dir in $imgs_dirs
 do
   echo imgs_dir = "$imgs_dir"
@@ -32,6 +12,16 @@ do
 
   for img_dir in `ls "$main_dir"'/'"$imgs_dir"'/for_test/'`
   do
+     if echo $img_dir | grep -q -E 'screw_normal'
+     then
+       target_class='screw_normal'
+     elif echo $img_dir | grep -q -E 'screw_half'
+     then
+       target_class='screw_abnormal'
+     elif echo $img_dir | grep -q -E 'screw_loose'
+     then
+       target_class='screw_abnormal'
+     fi
 
 #    imgs_path="$main_dir"'/'"$imgs_dir"'/for_test/'"$img_dir"'/768x432'
     imgs_path="$main_dir"'/'"$imgs_dir"'/for_test/'"$img_dir"
@@ -61,10 +51,9 @@ do
 
   done
 done
-done
 
 cd results/"$imgs_dir"
-echo clip,total_frame,accuracy,acc_avg_conf,acc_min_conf,acc_max_conf,false_rate,false_avg_conf,false_min_conf,false_max_conf,recall > total-log.txt
+echo clip,total_frame,empty_frame,accuracy,acc_avg_conf,acc_min_conf,acc_max_conf,false_rate,false_avg_conf,false_min_conf,false_max_conf,recall > total-log.txt
 for i in `ls *_log.txt`
 do 
   tail -1 $i >> total-log.txt
