@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+from turtle import pos
 import cv2
 import time
 import configparser
@@ -8,6 +9,8 @@ import DarknetFunc as DFUNC
 import YoloObj
 import cv2
 import os
+import glob
+import calc_period
 
 parser = argparse.ArgumentParser()
 
@@ -20,6 +23,11 @@ parser.add_argument('--resize', default=1.0, help='default=1.0')
 parser.add_argument('--gpu_idx', default='0', help='default=0')
 
 parser.add_argument('--thresh', default=0.25, help='default=0.25')
+
+parser.add_argument('--net_size', default=None, help='default=None')
+
+parser.add_argument('--negative_obj', nargs='+', default='abnormal',
+                         help='default="abnormal"')
 
 subparsers = parser.add_subparsers(dest='subparsers', help='img_detect, video_detect')
 
@@ -35,8 +43,32 @@ parser_img.add_argument('--noshow_img', default=False,
 parser_img.add_argument('--save_img', default=False, 
                         action='store_true', help='default=False')
 
+parser_img.add_argument('--save_path', default='./test_pic.jpg', 
+                        help='default=./test_pic.jpg')
+
 parser_img.add_argument('--exclude_objs', nargs='+', default='background',
                         help='default="background"')
+
+# parameters for images in a directory detection.
+parser_imgs = subparsers.add_parser('imgs_detect', 
+                                    help='single image detect.')
+parser_imgs.add_argument('--imgs_path', default=None, 
+                         required=True, help='default=None')
+
+parser_imgs.add_argument('--noshow_img', default=False, 
+                         action='store_true', help='default=True')
+
+parser_imgs.add_argument('--save_img', default=False, 
+                         action='store_true', help='default=False')
+
+parser_imgs.add_argument('--target_class', default=None, 
+                         help='positive class')
+
+parser_imgs.add_argument('--output_dir', default=None, 
+                         help='default=None')
+
+parser_imgs.add_argument('--exclude_objs', nargs='+', default='background',
+                         help='default="background"')
 
 # parameters for video detection.
 parser_video = subparsers.add_parser('video_detect', 
@@ -44,7 +76,14 @@ parser_video = subparsers.add_parser('video_detect',
 parser_video.add_argument('--video_path', default=None, 
                           required=True, help='default=None')
 
+parser_video.add_argument('--check_delay',
+                    help='time delay when checking. Default=33 ms (FPS: 30)',
+                    default=33)
+
 parser_video.add_argument('--save_video', default=False, action='store_true',
+                          help='default=False')
+
+parser_video.add_argument('--save_images', default=False, action='store_true',
                           help='default=False')
 
 parser_video.add_argument('--auto_label', default=False, action='store_true',
@@ -63,12 +102,39 @@ cfg_file = args.cfg_file
 config = configparser.RawConfigParser()
 config.read(cfg_file)
 
-darknet_cfg = config['DARKNET']['CFG']
-darknet_weights = config['DARKNET']['WEIGHTS']
-darknet_data = config['DARKNET']['DATA_FILE']
+darknet_model_dir = config['DARKNET']['MODEL_DIR']
+files = sorted(os.listdir(darknet_model_dir), key=lambda x: x[::-1])
+print(files)
+for f in files:
+    if f.endswith('.data'):
+        darknet_data = os.path.join(darknet_model_dir, f)
+
+    elif f.endswith('.weights'):
+        darknet_weights = os.path.join(darknet_model_dir, f)
+
+    elif f.endswith('.cfg'):
+        darknet_cfg = os.path.join(darknet_model_dir, f)
+
+    elif f.endswith('.names'):
+        darknet_names = os.path.join(darknet_model_dir, f)
+
+        with open(darknet_data, 'r') as ff:
+            lines = ff.readlines()
+ 
+        with open(darknet_data, 'w') as ff:
+            for line in lines:
+                if not line.startswith('names'):
+                    ff.write(line)
+
+            ff.write(f'names = {darknet_names}')
+
+print(darknet_data, darknet_weights, darknet_cfg)
 
 os.environ['CUDA_VISIBLE_DEVICES'] = args.gpu_idx
 print(os.environ['CUDA_VISIBLE_DEVICES'])
+
+if args.net_size is not None:
+    YoloObj.ChangeNetSize(darknet_cfg, args.net_size)
 
 net = DFUNC.load_net(bytes(darknet_cfg, 'utf-8'), 
                      bytes(darknet_weights, 'utf-8'), 0)
@@ -81,9 +147,15 @@ label_dict = {}
 for idx in range(meta.classes):
     label_dict[meta.names[idx]] = idx
 
+label_count_dict = {}
+for label_count in label_dict:
+    label_count_dict[label_count.decode()] = 0
+
+print('label_dict: ', label_dict)
+print('label_count_dict: ', label_count_dict)
 
 def ImgDetect(img_path, net, meta, darknet_data, save_path='./',
-              noshow_img=True, save_img=False):
+              noshow_img=True, negative_obj=[], save_img=False):
 
     import YoloObj
 
@@ -97,18 +169,19 @@ def ImgDetect(img_path, net, meta, darknet_data, save_path='./',
         obj = YoloObj.DetectedObj(result)
         objs.append(obj)
 
+    # print info.
+    print(args.imgs_path)
     for obj in objs:
-        print(obj.obj_string, obj.cx, obj.cy)
+        print(obj.obj_string, obj.cx, obj.cy) 
+    print(f'Number of objects: {len(objs)},  target_class: {args.target_class}')
 
-    print('Number of objects: ', len(objs), '\n')
-
-    YoloObj.DrawBBox(objs, img, 
-                     show=not noshow_img, save=save_img, save_path=save_path)
+    YoloObj.DrawBBox(objs, img, show=not noshow_img, 
+                     save=save_img, negative_obj=negative_obj, save_path=save_path)
 
     return objs
 
 
-def VideoDetect(video_path, label_dict, 
+def VideoDetect(video_path, check_delay, label_dict, save_images=False, 
                 save_video=False, auto_label=False, skip_nolabel=False,
                 resize=1.0, exclude_objs='background', autolabel_dir='images'):
 
@@ -118,12 +191,25 @@ def VideoDetect(video_path, label_dict,
     fps = cap.get(cv2.CAP_PROP_FPS)
     width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH) * float(resize))
     height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT) * float(resize))
+    print('test1: ', width, height)
     print('fps:', fps)
 
     if save_video:
         out = cv2.VideoWriter('output.avi', fourcc, 30.0, (width, height))
 
     ii=0
+
+    if save_images:
+        import shutil
+
+        if not os.path.isdir('out_images'):
+            os.mkdir('out_images')
+
+        else:
+            shutil.rmtree('out_images')
+
+            os.mkdir('out_images')
+
     while (cap.isOpened()):
         ii+=1
         ret, frame = cap.read()
@@ -154,15 +240,21 @@ def VideoDetect(video_path, label_dict,
                                  skip_nolabel=args.skip_nolabel
                                 )
 
-        img = YoloObj.DrawBBox(new_objs, frame, show=False, save=False)
+        img = YoloObj.DrawBBox(new_objs, frame, 
+                               show=False, save=False,
+                               line_width=1, text_size=3)
 
         if save_video:
             out.write(img)
 
-#        cv2.imshow(dirname + '/' + filename, img)
-        cv2.imshow(args.video_path, img)
+        if save_images:
+            cv2.imwrite(f'out_images/frame{ii:05d}.jpg', img)
 
-        k = cv2.waitKey(1) & 0xFF
+
+#        cv2.imshow(dirname + '/' + filename, img)
+        cv2.imshow(video_path, img)
+
+        k = cv2.waitKey(int(check_delay)) & 0xFF
 
         if k == 27 or k== ord('q'):
             break
@@ -175,7 +267,9 @@ def VideoDetect(video_path, label_dict,
 
 if __name__ == '__main__':
     if args.subparsers == 'video_detect':
-        VideoDetect(args.video_path, label_dict, 
+        print('check_delay: ', args.check_delay)
+        VideoDetect(args.video_path, args.check_delay, label_dict,
+                    save_images=args.save_images, 
                     save_video=args.save_video,
                     auto_label=args.auto_label,
                     skip_nolabel=args.skip_nolabel,
@@ -185,8 +279,138 @@ if __name__ == '__main__':
 
     elif args.subparsers == 'img_detect':
         ImgDetect(args.img_path, net, meta, darknet_data,
-                  save_path='./test_pic.jpg', 
+                  save_path=args.save_path, 
                   noshow_img=args.noshow_img, save_img=args.save_img)
+
+    elif args.subparsers == 'imgs_detect':
+        img_fs = glob.glob(os.path.join(args.imgs_path, '*.jpg')) 
+        img_fs.sort()
+        total_frame = len(img_fs)
+
+        output_dir = args.output_dir
+        result_log = output_dir + '_log.txt' 
+        f_log = open(result_log, 'w')
+
+        if args.target_class:
+            positive_confs = []
+            negative_confs = []
+ 
+        time_period = calc_period.TimePeriod()
+        frame_detected = 0
+        nobj = 0
+        for idx, img_f in enumerate(img_fs):
+            t = time_period.calc_period()
+
+            img_f_basename = os.path.basename(img_f)
+     
+            save_path = os.path.join(output_dir, img_f_basename)
+
+            objs = ImgDetect(img_f, net, meta, darknet_data,
+                             save_path=save_path, negative_obj=args.negative_obj,
+                             noshow_img=args.noshow_img, save_img=args.save_img)
+
+            f_log.write(str(idx+1) + ': ' + img_f + '\n')
+            if args.target_class and len(objs) == 0:
+                print(f'Empty, Frame detected: {frame_detected}, Total: {idx+1}/{total_frame}')
+      
+            if not args.target_class:
+                print(f'Frame detected: {frame_detected}, Total: {idx+1}/{total_frame}')
+
+            if len(objs) != 0:
+                nobj += len(objs)
+                frame_detected += 1
+
+            for obj in objs:
+                label_count_dict[obj.name] += 1
+
+                if args.target_class:
+                    if obj.name == args.target_class:
+                        positive_confs.append(obj.conf)
+                        f_log.write(f'{obj.obj_string}   True\n')
+                        print(f' True, Frame detected: {frame_detected}, Total: {idx+1}/{total_frame}')
+                    else:
+                        negative_confs.append(obj.conf)
+                        f_log.write(f'{obj.obj_string}   False\n')
+                        print(f'False, Frame detected: {frame_detected}, Total: {idx+1}/{total_frame}')
+
+
+            f_log.write('\n')
+            print(f'{t}\n')
+
+        if args.target_class:
+            positive_confs.sort()
+            negative_confs.sort()
+            total_tag = len(positive_confs) + len(negative_confs)
+
+        f_log.write(str(label_count_dict) + '\n')
+
+        if args.target_class:
+            if total_tag > 0:
+                accuracy = label_count_dict[args.target_class] / total_tag * 100
+                anti_acc = 100 - accuracy
+                acc_str_f = '{:.1f}'
+            else:
+                accuracy = 'N/A'
+                anti_acc = 'N/A'
+                acc_str_f = '{:s}'
+
+            recall = (len(positive_confs)/total_frame) * 100
+            f_log.write(f'    target class: {args.target_class}\n')
+            f_log.write(f'    Total frames: {total_frame:6d}\n')
+            f_log.write(f'    Empty frames: {total_frame-frame_detected:6d}\n')
+            f_log.write(f'      Total tags: {nobj:6d}\n')
+            f_log.write(f'   True Positive: {len(positive_confs):6d}\n')
+            f_log.write(f'  False Negative: {len(negative_confs):6d}\n')
+            f_log.write(f'        Accuracy: {accuracy:6.1f}\n') if acc_str_f == '{:.1f}' else f_log.write(f'        Accuracy: {accuracy:>6s}\n')
+            f_log.write(f'          Recall: {recall:6.1f}\n')
+ 
+            if len(positive_confs) > 0:
+                positive_conf = sum(positive_confs)/len(positive_confs)
+                pos_min_conf = positive_confs[0]
+                pos_max_conf = positive_confs[-1]
+                pos_str_f = '{:.1f}'
+                f_log.write(f'   Positive conf: {positive_conf:>6.1f} {pos_min_conf:>6.1f} {pos_max_conf:>6.1f}\n')
+            else:
+                positive_conf = pos_min_conf = pos_max_conf = 'N/A'
+                pos_str_f = '{:s}'
+                f_log.write(f'   Positive conf: {"N/A":>6s} {"N/A":>6s} {"N/A":>6s}\n')
+
+            if len(negative_confs) > 0:
+                negative_conf = sum(negative_confs)/len(negative_confs)
+                neg_min_conf = negative_confs[0]
+                neg_max_conf = negative_confs[-1]
+                neg_str_f = '{:.1f}'
+                f_log.write(f'   Negetive conf: {negative_conf:>6.1f} {neg_min_conf:>6.1f} {neg_max_conf:>6.1f}\n')
+            else:
+                negative_conf = neg_min_conf = neg_max_conf = 'N/A'
+                neg_str_f = '{:s}'
+                f_log.write(f'   Negetive conf: {"N/A":>6s} {"N/A":>6s} {"N/A":>6s}\n')
+
+            summary_str_f = '{},{},{},' \
+                            + acc_str_f + ',' \
+                            + pos_str_f + ',' + pos_str_f + ','+ pos_str_f + ',' \
+                            + acc_str_f + ',' \
+                            + neg_str_f + ',' + neg_str_f + ',' + neg_str_f + ',' \
+                            + acc_str_f + '\n'
+
+            imgs_dir_base = os.path.basename(args.imgs_path)
+            summary_str = summary_str_f.format(imgs_dir_base, total_frame, total_frame-frame_detected,
+                                               accuracy, 
+                                               positive_conf, pos_min_conf, pos_max_conf, 
+                                               anti_acc, 
+                                               negative_conf, neg_min_conf, neg_max_conf, 
+                                               recall)
+
+            f_log.write(f'Models: {darknet_model_dir}\n')
+            f_log.write(summary_str)
+
+        else:
+            f_log.write(f'    Total frames: {total_frame:6d}\n')
+            f_log.write(f' Detected frames: {frame_detected:6d}\n')
+            f_log.write(f'      Total tags: {nobj:6d}\n')
+            f_log.write(f'Models: {darknet_model_dir}\n')
+
+        f_log.close()
 
     else:
         print('Nothing to do.')
