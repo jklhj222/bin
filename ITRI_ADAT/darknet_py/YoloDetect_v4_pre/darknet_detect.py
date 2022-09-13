@@ -387,19 +387,18 @@ if __name__ == '__main__':
                 f_log.write(f'   Negetive conf: {"N/A":>6s} {"N/A":>6s} {"N/A":>6s}\n')
 
             summary_str_f = '{},{},{}' \
-                            + acc_str_f + ',' \
+                            + acc_str_f + ',' + acc_str_f + ',' \
                             + pos_str_f + ',' + pos_str_f + ','+ pos_str_f + ',' \
                             + acc_str_f + ',' \
                             + neg_str_f + ',' + neg_str_f + ',' + neg_str_f + ',' \
-                            + acc_str_f + '\n'
+                            + '\n'
 
             imgs_dir_base = os.path.basename(args.imgs_path)
             summary_str = summary_str_f.format(imgs_dir_base, total_frame, total_frame-frame_detected,
-                                               accuracy, 
+                                               accuracy, recall, 
                                                positive_conf, pos_min_conf, pos_max_conf, 
                                                anti_acc, 
-                                               negative_conf, neg_min_conf, neg_max_conf, 
-                                               recall)
+                                               negative_conf, neg_min_conf, neg_max_conf)
 
             f_log.write(f'Models: {darknet_model_dir}\n')
             f_log.write(summary_str)
