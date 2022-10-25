@@ -140,7 +140,7 @@ def DrawBBox(objs, img, show=True, save=False,
         text_x = obj.l
         text_y = obj.t - 10 if obj.t > 30 else obj.b + 20 
         image = cv2.putText(img,
-                            obj.name + str(obj.conf),
+                            obj.name + ':' + str(obj.conf),
                             (text_x, text_y), 
                             cv2.FONT_HERSHEY_TRIPLEX, 
                             0.5, 
