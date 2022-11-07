@@ -30,6 +30,17 @@ then
     nfilter2=`echo $(grep -n yolo train.cfg | tail -1 | awk -F ':' '{print $1}') - 3 | bc`
     sed -i "$nfilter1""cfilters = $filter" train.cfg
     sed -i "$nfilter2""cfilters = $filter" train.cfg
+elif [ $arch = 'yolov4-tiny-3l' ]
+then
+    echo in yolov4-tiny-3l
+    cp yolov4-tiny-3l.cfg train.cfg
+    nfilter1=`echo $(grep -n yolo train.cfg | head -1 | awk -F ':' '{print $1}') - 3 | bc`
+    nfilter2=`echo $(grep -n yolo train.cfg | head -2 | tail -1 | awk -F ':' '{print $1}') - 3 | bc`
+    nfilter3=`echo $(grep -n yolo train.cfg | tail -1 | awk -F ':' '{print $1}') - 3 | bc`
+    echo $nfilter1   $nfilter2   $nfilter3
+    sed -i "$nfilter1""cfilters = $filter" train.cfg
+    sed -i "$nfilter2""cfilters = $filter" train.cfg
+    sed -i "$nfilter3""cfilters = $filter" train.cfg
 fi
 
 sed -i 's/classes.*$/classes = '"$nclass"'/g' train.cfg
