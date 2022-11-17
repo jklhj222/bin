@@ -386,11 +386,11 @@ if __name__ == '__main__':
                 neg_str_f = '{:s}'
                 f_log.write(f'   Negetive conf: {"N/A":>6s} {"N/A":>6s} {"N/A":>6s}\n')
 
-            summary_str_f = '{},{},{}' \
+            summary_str_f = '{},{},{},' \
                             + acc_str_f + ',' + acc_str_f + ',' \
                             + pos_str_f + ',' + pos_str_f + ','+ pos_str_f + ',' \
                             + acc_str_f + ',' \
-                            + neg_str_f + ',' + neg_str_f + ',' + neg_str_f + ',' \
+                            + neg_str_f + ',' + neg_str_f + ',' + neg_str_f  \
                             + '\n'
 
             imgs_dir_base = os.path.basename(args.imgs_path)
