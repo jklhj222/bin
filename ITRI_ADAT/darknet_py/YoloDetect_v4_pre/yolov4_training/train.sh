@@ -50,7 +50,9 @@ sed -i 's/classes.*$/classes='"$nclass"'/g' task.data
 
 sed '2,3d' train.cfg | sed '1a batch = 1' | sed '2a subdivisions = 1' > test.cfg
 
-mkdir result
-cp backup/train_best.weights test.cfg label.names task.data   result
+mkdir result_best
+mkdir result_last
+cp backup/train_best.weights test.cfg label.names task.data   result_best
+cp backup/train_last.weights test.cfg label.names task.data   result_last
 
 echo `date` >> elapsed_time.dat
