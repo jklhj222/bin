@@ -342,6 +342,7 @@ if __name__ == '__main__':
             negative_confs.sort()
             total_tag = len(positive_confs) + len(negative_confs)
 
+        f_log.write(str(darknet_model_dir) + '\n')
         f_log.write(str(label_count_dict) + '\n')
 
         if args.target_class:
