@@ -1,0 +1,6 @@
+/home/jklhj/work/ADAT/amb_project/winbond_extinguisher/weights/T_winbond_extinguisher_0208_v7
+{'normal': 0, 'abnormal': 0}
+    Total frames:      0
+ Detected frames:      0
+      Total tags:      0
+Models: /home/jklhj/work/ADAT/amb_project/winbond_extinguisher/weights/T_winbond_extinguisher_0208_v7
