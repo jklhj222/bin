@@ -284,6 +284,7 @@ if __name__ == '__main__':
 
     elif args.subparsers == 'imgs_detect':
         img_fs = glob.glob(os.path.join(args.imgs_path, '*.jpg')) 
+        img_fs.extend(glob.glob(os.path.join(args.imgs_path, '*.png')))
         img_fs.sort()
         total_frame = len(img_fs)
 
