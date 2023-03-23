@@ -356,7 +356,9 @@ if __name__ == '__main__':
                 anti_acc = 'N/A'
                 acc_str_f = '{:s}'
 
+            recall_str_f = '{:.1f}'
             recall = (len(positive_confs)/total_frame) * 100
+
             f_log.write(f'    target class: {args.target_class}\n')
             f_log.write(f'    Total frames: {total_frame:6d}\n')
             f_log.write(f'    Empty frames: {total_frame-frame_detected:6d}\n')
@@ -389,7 +391,7 @@ if __name__ == '__main__':
                 f_log.write(f'   Negetive conf: {"N/A":>6s} {"N/A":>6s} {"N/A":>6s}\n')
 
             summary_str_f = '{},{},{},' \
-                            + acc_str_f + ',' + acc_str_f + ',' \
+                            + acc_str_f + ',' + recall_str_f + ',' \
                             + pos_str_f + ',' + pos_str_f + ','+ pos_str_f + ',' \
                             + acc_str_f + ',' \
                             + neg_str_f + ',' + neg_str_f + ',' + neg_str_f  \
