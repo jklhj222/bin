@@ -390,11 +390,27 @@ if __name__ == '__main__':
                 neg_str_f = '{:s}'
                 f_log.write(f'   Negetive conf: {"N/A":>6s} {"N/A":>6s} {"N/A":>6s}\n')
 
+            target_str = ''
+            target_str_f = ''
+            target_num = []
+            for target in label_count_dict:
+                target_str += ',' + target
+                target_str_f += ',{}'
+                target_num.append(label_count_dict[target])
+
+            summary_title = 'clip,total_frame,empty_frame,' \
+                            + 'accuracy,recall,' \
+                            + 'acc_avg_conf,acc_min_conf,acc_max_conf,' \
+                            + 'false_rate,' \
+                            + 'false_avg_conf,false_min_conf,false_max_conf' \
+                            + target_str \
+                            + '\n'
             summary_str_f = '{},{},{},' \
                             + acc_str_f + ',' + recall_str_f + ',' \
                             + pos_str_f + ',' + pos_str_f + ','+ pos_str_f + ',' \
                             + acc_str_f + ',' \
                             + neg_str_f + ',' + neg_str_f + ',' + neg_str_f  \
+                            + target_str_f \
                             + '\n'
 
             imgs_dir_base = os.path.basename(args.imgs_path)
@@ -402,9 +418,11 @@ if __name__ == '__main__':
                                                accuracy, recall, 
                                                positive_conf, pos_min_conf, pos_max_conf, 
                                                anti_acc, 
-                                               negative_conf, neg_min_conf, neg_max_conf)
+                                               negative_conf, neg_min_conf, neg_max_conf,
+                                               *target_num)
 
             f_log.write(f'Models: {darknet_model_dir}\n')
+            f_log.write(summary_title)
             f_log.write(summary_str)
 
         else:
