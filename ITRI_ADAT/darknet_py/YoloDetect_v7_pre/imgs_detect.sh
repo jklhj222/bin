@@ -1,9 +1,9 @@
 #!/bin/bash
-net_size=416
+net_size=1024
 
-main_dir='/home/jklhj/work/ADAT/winbond_facility/20230112_AI_material/'
-imgs_dirs='Rename_frames/'
-negative_obj='abnormal'
+main_dir='/home/jklhj/work/ADAT/TWUAV/TWUAV_20230627onsite'
+imgs_dirs='test_frames/'
+negative_obj='pitot_abnormal screwA_abnormal screwB_abnormal blade_abnormal screwC_abnormal'
 
 for imgs_dir in $imgs_dirs
 do
@@ -12,13 +12,41 @@ do
 
   for img_dir in `ls "$main_dir"'/'"$imgs_dir"'/for_test/'`
   do
-    if [[ "$img_dir" == *Normal* ]]
+    if [[ "$img_dir" == *PitotNormal* ]]
     then
-        target_class='normal'
+        target_class='pitot_normal'
     fi
-    if [[ "$img_dir" == *Abnormal* ]]
+    if [[ "$img_dir" == *PitotHalf* ]]
     then
-        target_class='abnormal'
+        target_class='pitot_abnormal'
+    fi
+    if [[ "$img_dir" == *PitotNoExist* ]]
+    then
+        target_class='pitot_abnormal'
+    fi
+    if [[ "$img_dir" == *ScrewBExist* ]]
+    then
+        target_class='screwB_normal'
+    fi
+    if [[ "$img_dir" == *ScrewBNoExist* ]]
+    then
+        target_class='screwB_abnormal'
+    fi
+    if [[ "$img_dir" == *BladeNormal* ]]
+    then
+        target_class='blade_normal'
+    fi
+    if [[ "$img_dir" == *BladeWrong* ]]
+    then
+        target_class='blade_abnormal'
+    fi
+    if [[ "$img_dir" == *ScrewCNormal* ]]
+    then
+        target_class='screwC_normal'
+    fi
+    if [[ "$img_dir" == *ScrewC*Noexist* ]]
+    then
+        target_class='screwC_abnormal'
     fi
 
 #    imgs_path="$main_dir"'/'"$imgs_dir"'/for_test/'"$img_dir"'/768x432'
@@ -42,6 +70,8 @@ do
             --target_class "$target_class" \
             --save_img \
             --noshow_img 
+#            --auto_label \
+#            --skip_nolabel
 
     cp -r $output_dir results/"$imgs_dir"
     cp "$output_dir"_log.txt results/"$imgs_dir"
@@ -51,12 +81,17 @@ do
 done
 
 cd results/"$imgs_dir"
-echo clip,total_frame,empty_frame,accuracy,recall,acc_avg_conf,acc_min_conf,acc_max_conf,false_rate,false_avg_conf,false_min_conf,false_max_conf > total-log.txt
+#echo clip,total_frame,empty_frame,accuracy,recall,acc_avg_conf,acc_min_conf,acc_max_conf,false_rate,false_avg_conf,false_min_conf,false_max_conf > total-log.txt
+ii=0
 for i in `ls *_log.txt`
-do 
-  tail -1 $i >> total-log.txt
+do
+  if [ "$ii" == 0 ]
+  then
+    tail -2 $i > total-log.txt
+  else
+    tail -1 $i >> total-log.txt
+  fi
+  ii=`echo "$ii"+1 | bc` 
 done
 cd -
-
-
 
