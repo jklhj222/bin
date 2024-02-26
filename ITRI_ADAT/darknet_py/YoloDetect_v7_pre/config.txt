@@ -1,3 +1,3 @@
 [DARKNET]
 MODEL_DIR = /home/jklhj/work/ADAT/amb_project/winbond_extinguisher/weights/T_winbond_extinguisher_0208_v7
-SHARED_LIB = /home/jklhj/pkg/local/AlexeyAB_darkent_origin_v7/libdarknet.so
+SHARED_LIB = /home/jklhj/pkg/local/AlexeyAB_darkent_origin_v7_cuda118_cv480/libdarknet.so
